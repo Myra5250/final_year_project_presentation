@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sacco Admin | Professional Management Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Login / Register Overlay -->
+    <div id="login-overlay">
+        <div class="login-card" id="login-view">
+            <div class="sidebar-header" style="justify-content: center; margin-bottom: 1rem;">
+                <i class="fa-solid fa-building-columns"></i>
+                <span style="color: #0f172a;">SACCO </span><span style="color: var(--primary);">ADMIN</span>
+            </div>
+            <h2>Employee Login</h2>
+            <div id="login-error" class="badge badge-danger hidden"
+                style="width: 100%; margin-bottom: 1.5rem; text-align: center; border-radius: 8px;"></div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label>Corporate Email</label>
+                    <input type="email" id="email" placeholder="admin@sacco.ug" required>
+                </div>
+                <div class="form-group">
+                    <label>Access Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary"
+                    style="width: 100%; justify-content: center; padding: 1rem; border-radius: 12px;">
+                    <i class="fa-solid fa-lock"></i> Secure Login
+                </button>
+            </form>
+            <p style="margin-top: 2rem; text-align: center; font-size: 0.875rem; color: #64748b;">
+                New administrator? <a href="#" id="show-register"
+                    style="color: var(--primary); font-weight: 700; text-decoration: none;">Request Account</a>
+            </p>
+        </div>
+
+        <div class="login-card hidden" id="register-view">
+            <div class="sidebar-header" style="justify-content: center; margin-bottom: 1rem;">
+                <i class="fa-solid fa-building-columns"></i>
+                <span style="color: #0f172a;">SACCO </span><span style="color: var(--primary);">ADMIN</span>
+            </div>
+            <h2>Create Administrative Account</h2>
+            <div id="register-error" class="badge badge-danger hidden"
+                style="width: 100%; margin-bottom: 1.5rem; text-align: center; border-radius: 8px;"></div>
+            <form id="register-form">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Full Legal Name</label>
+                        <input type="text" id="reg-fullname" placeholder="John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Official Username</label>
+                        <input type="text" id="reg-username" placeholder="jdoe_admin" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Official Email</label>
+                    <input type="email" id="reg-email" placeholder="admin@sacco.ug" required>
+                </div>
+                <div class="form-group">
+                    <label>Work Phone</label>
+                    <input type="text" id="reg-phone" placeholder="+256..." required>
+                </div>
+                <div class="form-group">
+                    <label>Set Password</label>
+                    <input type="password" id="reg-password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary"
+                    style="width: 100%; justify-content: center; padding: 1rem; border-radius: 12px;">
+                    Register System Admin
+                </button>
+            </form>
+            <p style="margin-top: 2rem; text-align: center; font-size: 0.875rem; color: #64748b;">
+                Already have an account? <a href="#" id="show-login"
+                    style="color: var(--primary); font-weight: 700; text-decoration: none;">Return to Login</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar hidden" id="sidebar">
+        <div class="sidebar-header">
+            <i class="fa-solid fa-building-columns"></i>
+            <span>SACCO </span><span style="color: var(--primary);">ADMIN</span>
+        </div>
+        <ul class="nav-links">
+            <li class="nav-item">
+                <a href="#" class="nav-link active" data-page="dashboard">
+                    <i class="fa-solid fa-house"></i> <span>Executive Overview</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-page="users">
+                    <i class="fa-solid fa-users"></i> <span>Member Registry</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-page="loans">
+                    <i class="fa-solid fa-hand-holding-dollar"></i> <span>Loan Portfolio</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-page="transactions">
+                    <i class="fa-solid fa-receipt"></i> <span>Financial Audit</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-page="settings">
+                    <i class="fa-solid fa-gears"></i> <span>System Settings</span>
+                </a>
+            </li>
+            <li class="nav-item"
+                style="margin-top: auto; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.05);">
+                <a href="#" class="nav-link" id="logout-btn" style="color: #fca5a5;">
+                    <i class="fa-solid fa-power-off"></i> <span>System Exit</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content hidden" id="main-content">
+        <header>
+            <div class="page-title">
+                <h1 id="page-heading">Executive Overview</h1>
+            </div>
+            <div class="user-profile">
+                <div class="user-info">
+                    <div class="user-name" id="admin-name">Admin User</div>
+                    <div class="user-role">System Auditor</div>
+                </div>
+                <div class="avatar" id="admin-avatar">A</div>
+            </div>
+        </header>
+
+        <!-- Dashboard Page -->
+        <section id="page-dashboard">
+            <div class="stats-grid" id="stats-grid">
+                <div class="stat-card">
+                    <i class="fa-solid fa-user-group stat-icon"></i>
+                    <span class="stat-label">Total Members</span>
+                    <span class="stat-value" id="stat-users">...</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fa-solid fa-piggy-bank stat-icon"></i>
+                    <span class="stat-label">Active Savings</span>
+                    <span class="stat-value" id="stat-savings">UGX 0</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fa-solid fa-chart-pie stat-icon"></i>
+                    <span class="stat-label">Shares Capital</span>
+                    <span class="stat-value" id="stat-shares">UGX 0</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fa-solid fa-hourglass-half stat-icon"></i>
+                    <span class="stat-label">Loan Requests</span>
+                    <span class="stat-value" id="stat-loans">...</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fa-solid fa-vault stat-icon"></i>
+                    <span class="stat-label">Disbursed Capital</span>
+                    <span class="stat-value" id="stat-disbursed">UGX 0</span>
+                </div>
+            </div>
+
+            <div class="data-card">
+                <div class="card-header">
+                    <h3>Pending Disbursements</h3>
+                    <button class="btn btn-primary btn-sm" onclick="app.navigate('loans')">
+                        Manage Portfolio <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table id="recent-loans-table">
+                        <thead>
+                            <tr>
+                                <th>Applicant Details</th>
+                                <th>Requested Sum</th>
+                                <th>Term Period</th>
+                                <th>Risk Status</th>
+                                <th>Executive Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Users Page -->
+        <section id="page-users" class="hidden">
+            <div class="data-card">
+                <div class="card-header">
+                    <h3>Member Management Console</h3>
+                </div>
+                <div class="table-responsive">
+                    <table id="members-table">
+                        <thead>
+                            <tr>
+                                <th>Member UID</th>
+                                <th>Legal Name</th>
+                                <th>Contact Info</th>
+                                <th>Cash Balance</th>
+                                <th>Savings</th>
+                                <th>Shares Holding</th>
+                                <th>Reg. Date</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loans Page -->
+        <section id="page-loans" class="hidden">
+            <div class="data-card">
+                <div class="card-header">
+                    <h3>Loan Application Pipeline</h3>
+                </div>
+                <div class="table-responsive">
+                    <table id="loans-table">
+                        <thead>
+                            <tr>
+                                <th>Application #</th>
+                                <th>Member Name</th>
+                                <th>Requested Amount</th>
+                                <th>Financial Justification</th>
+                                <th>Submission Date</th>
+                                <th>Current Status</th>
+                                <th>Audit Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Transactions Page -->
+        <section id="page-transactions" class="hidden">
+            <div class="data-card">
+                <div class="card-header">
+                    <h3>Global Financial Audit Log</h3>
+                </div>
+                <div class="table-responsive">
+                    <table id="transactions-table">
+                        <thead>
+                            <tr>
+                                <th>Audit Reference</th>
+                                <th>Initiating Member</th>
+                                <th>Transaction Sum</th>
+                                <th>Type Class</th>
+                                <th>System Status</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Configuration Page -->
+        <section id="page-settings" class="hidden">
+            <div class="data-card" style="max-width: 600px;">
+                <div class="card-header">
+                    <h3>System Parameter Configuration</h3>
+                </div>
+                <div style="padding: 2rem;">
+                    <form id="config-form" onsubmit="app.updateConfig(event)">
+                        <div class="form-group">
+                            <label>Default Loan Interest Rate (%)</label>
+                            <input type="number" id="conf-interest" step="0.1" placeholder="8.0" required>
+                            <small style="color: #64748b;">Annual interest rate applied to new loan
+                                applications.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Share Unit Price (UGX)</label>
+                            <input type="number" id="conf-share-price" placeholder="10000" required>
+                            <small style="color: #64748b;">The price for a single corporate share in the Sacco.</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+                            <i class="fa-solid fa-save"></i> Apply System Updates
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
