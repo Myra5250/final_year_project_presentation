@@ -28,17 +28,24 @@
                 </div>
                 <div class="form-group">
                     <label>Access Password</label>
-                    <input type="password" id="password" placeholder="••••••••" required>
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <input type="password" id="password" placeholder="••••••••" required style="padding-right: 3rem;">
+                        <i class="fa-solid fa-eye-slash" id="toggle-password" style="position: absolute; right: 1.25rem; cursor: pointer; color: var(--text-muted);"></i>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary"
+                <button type="submit" class="btn btn-primary" id="login-submit-btn"
                     style="width: 100%; justify-content: center; padding: 1rem; border-radius: 12px;">
                     <i class="fa-solid fa-lock"></i> Secure Login
                 </button>
             </form>
-            <p style="margin-top: 2rem; text-align: center; font-size: 0.875rem; color: #64748b;">
+            <p style="margin-top: 1.5rem; text-align: center; font-size: 0.875rem; color: #64748b;">
                 New administrator? <a href="#" id="show-register"
                     style="color: var(--primary); font-weight: 700; text-decoration: none;">Request Account</a>
             </p>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 1.5rem; color: var(--text-muted); font-size: 0.75rem; font-weight: 600; border-top: 1px solid var(--sidebar-border); padding-top: 1rem;">
+                <i class="fa-solid fa-shield-halved" style="color: var(--success); font-size: 0.85rem;"></i>
+                <span>AES-256 Bit Secure Connection</span>
+            </div>
         </div>
 
         <div class="login-card hidden" id="register-view">
@@ -66,21 +73,36 @@
                 </div>
                 <div class="form-group">
                     <label>Work Phone</label>
-                    <input type="text" id="reg-phone" placeholder="+256..." required>
+                    <input type="text" id="reg-phone" placeholder="07XXXXXXXX" maxlength="10" pattern="[0-9]{10}" title="Please enter exactly 10 digits" required>
                 </div>
                 <div class="form-group">
                     <label>Set Password</label>
-                    <input type="password" id="reg-password" placeholder="••••••••" required>
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <input type="password" id="reg-password" placeholder="••••••••" required style="padding-right: 3rem;">
+                        <i class="fa-solid fa-eye-slash" id="toggle-reg-password" style="position: absolute; right: 1.25rem; cursor: pointer; color: var(--text-muted);"></i>
+                    </div>
+                    <div id="password-strength-container" style="margin-top: 0.5rem; display: none;">
+                        <div style="display: flex; gap: 4px; height: 4px;">
+                            <div id="strength-bar-1" style="flex: 1; background: #cbd5e1; border-radius: 2px; transition: background 0.2s;"></div>
+                            <div id="strength-bar-2" style="flex: 1; background: #cbd5e1; border-radius: 2px; transition: background 0.2s;"></div>
+                            <div id="strength-bar-3" style="flex: 1; background: #cbd5e1; border-radius: 2px; transition: background 0.2s;"></div>
+                        </div>
+                        <small id="strength-text" style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; display: inline-block; font-weight: 600;">Strength: Weak</small>
+                    </div>
                 </div>
                 <button type="submit" class="btn btn-primary"
                     style="width: 100%; justify-content: center; padding: 1rem; border-radius: 12px;">
                     Register System Admin
                 </button>
             </form>
-            <p style="margin-top: 2rem; text-align: center; font-size: 0.875rem; color: #64748b;">
+            <p style="margin-top: 1.5rem; text-align: center; font-size: 0.875rem; color: #64748b;">
                 Already have an account? <a href="#" id="show-login"
                     style="color: var(--primary); font-weight: 700; text-decoration: none;">Return to Login</a>
             </p>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 1.5rem; color: var(--text-muted); font-size: 0.75rem; font-weight: 600; border-top: 1px solid var(--sidebar-border); padding-top: 1rem;">
+                <i class="fa-solid fa-shield-halved" style="color: var(--success); font-size: 0.85rem;"></i>
+                <span>AES-256 Bit Secure Connection</span>
+            </div>
         </div>
     </div>
 
@@ -131,17 +153,117 @@
             <div class="page-title">
                 <h1 id="page-heading">Executive Overview</h1>
             </div>
-            <div class="user-profile">
-                <div class="user-info">
-                    <div class="user-name" id="admin-name">Admin User</div>
-                    <div class="user-role">System Auditor</div>
+            <div class="header-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="global-search-input" placeholder="Search records...">
+            </div>
+            <div class="header-right">
+                <button class="theme-toggle-btn" id="theme-toggle-btn" title="Toggle Theme">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                <!-- Notification Bell -->
+                <div class="notif-bell-wrapper" style="position: relative;">
+                    <button class="theme-toggle-btn" id="notif-bell" title="Notifications">
+                        <i class="fa-solid fa-bell"></i>
+                        <span class="notif-badge hidden" id="notif-badge"></span>
+                    </button>
+                    <div class="notif-dropdown hidden" id="notif-dropdown">
+                        <div class="notif-header">
+                            <span>Notifications</span>
+                            <span class="badge badge-danger" id="notif-loan-count" style="font-size:0.7rem;">0</span>
+                        </div>
+                        <div id="notif-items-list" style="max-height: 250px; overflow-y: auto;">
+                            <!-- Dynamically populated -->
+                            <div class="notif-item" onclick="app.navigate('loans')">
+                                <i class="fa-solid fa-hourglass-half" style="color: var(--warning);"></i>
+                                <div>
+                                    <div class="notif-item-title">Pending Loan Applications</div>
+                                    <div class="notif-item-sub"><span id="notif-loan-count-sub">0</span> awaiting your review</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="notif-footer" style="padding: 0.5rem 1rem; text-align: center; border-top: 1px solid var(--sidebar-border); font-size: 0.8rem; background: var(--sidebar-hover-bg);">
+                            <a href="#" id="notif-mark-all-read" style="color: var(--primary); text-decoration: none; font-weight: 600;">Mark all as read</a>
+                        </div>
+                    </div>
                 </div>
-                <div class="avatar" id="admin-avatar">A</div>
+                <div class="user-profile">
+                    <div class="user-info">
+                        <div class="user-name" id="admin-name">Admin User</div>
+                        <div class="user-role">System Auditor</div>
+                    </div>
+                    <div class="avatar" id="admin-avatar">A</div>
+                </div>
             </div>
         </header>
 
         <!-- Dashboard Page -->
         <section id="page-dashboard">
+            <!-- Welcome Banner Card -->
+            <div class="welcome-banner">
+                <div class="welcome-banner-left">
+                    <div class="welcome-avatar" id="welcome-admin-avatar">SA</div>
+                    <div class="welcome-message">
+                        <span class="welcome-greeting" id="welcome-greeting-text">GOOD AFTERNOON,</span>
+                        <h2><span id="welcome-admin-name">Super Admin</span></h2>
+                        <span class="welcome-role-badge"><i class="fa-solid fa-shield-halved"></i> SUPER ADMIN</span>
+                    </div>
+                </div>
+                <div class="welcome-banner-right">
+                    <div class="welcome-date-card">
+                        <span class="date-label">SYSTEM DATE</span>
+                        <span class="date-value" id="welcome-system-date">Tuesday, 26 May 2026</span>
+                    </div>
+                    <div class="welcome-status-badge">
+                        <span class="status-dot pulsing"></span>
+                        <span id="welcome-sacco-name">NANSANA YOUTH SACCO</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Operations -->
+            <div class="quick-operations-section">
+                <h3>QUICK OPERATIONS</h3>
+                <div class="quick-operations-grid">
+                    <div class="quick-op-card" id="op-add-member">
+                        <div class="quick-op-icon op-icon-green">
+                            <i class="fa-solid fa-user-plus"></i>
+                        </div>
+                        <div class="quick-op-info">
+                            <h4>Register Member</h4>
+                            <span>CREATE NEW ACCOUNT</span>
+                        </div>
+                    </div>
+                    <div class="quick-op-card" id="op-deposit">
+                        <div class="quick-op-icon op-icon-red">
+                            <i class="fa-solid fa-piggy-bank"></i>
+                        </div>
+                        <div class="quick-op-info">
+                            <h4>Deposit Funds</h4>
+                            <span>RECEIVE CASH</span>
+                        </div>
+                    </div>
+                    <div class="quick-op-card" id="op-withdraw">
+                        <div class="quick-op-icon op-icon-yellow">
+                            <i class="fa-solid fa-money-bill-transfer"></i>
+                        </div>
+                        <div class="quick-op-info">
+                            <h4>Withdraw Cash</h4>
+                            <span>DISBURSE CASH</span>
+                        </div>
+                    </div>
+                    <div class="quick-op-card" id="op-apply-loan">
+                        <div class="quick-op-icon op-icon-blue">
+                            <i class="fa-solid fa-hand-holding-dollar"></i>
+                        </div>
+                        <div class="quick-op-info">
+                            <h4>New Loan Request</h4>
+                            <span>APPLY FOR MEMBER</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="stats-grid" id="stats-grid">
                 <div class="stat-card">
                     <i class="fa-solid fa-user-group stat-icon"></i>
@@ -167,6 +289,89 @@
                     <i class="fa-solid fa-vault stat-icon"></i>
                     <span class="stat-label">Disbursed Capital</span>
                     <span class="stat-value" id="stat-disbursed">UGX 0</span>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header-custom">
+                        <h4>Capital Allocation Breakdown</h4>
+                        <span class="chart-subtitle">Savings vs. Shares capital distribution</span>
+                    </div>
+                    <div class="donut-chart-container">
+                        <div class="donut-svg-wrapper">
+                            <svg width="180" height="180" viewBox="0 0 180 180" id="capital-donut-chart">
+                                <!-- Background Circle -->
+                                <circle cx="90" cy="90" r="70" fill="transparent" stroke="var(--sidebar-hover-bg)"
+                                    stroke-width="16" />
+                                <!-- Savings Segment (Green) -->
+                                <circle id="donut-segment-savings" cx="90" cy="90" r="70" fill="transparent"
+                                    stroke="var(--success)" stroke-width="16" stroke-dasharray="440"
+                                    stroke-dashoffset="440" stroke-linecap="round" transform="rotate(-90 90 90)" />
+                                <!-- Shares Segment (Blue) -->
+                                <circle id="donut-segment-shares" cx="90" cy="90" r="70" fill="transparent"
+                                    stroke="var(--primary)" stroke-width="16" stroke-dasharray="440"
+                                    stroke-dashoffset="440" stroke-linecap="round" />
+                            </svg>
+                            <div class="donut-label-container">
+                                <span class="donut-label-val" id="donut-center-total">UGX 0</span>
+                                <span class="donut-label-sub">Total Portfolio</span>
+                            </div>
+                        </div>
+                        <div class="chart-legend">
+                            <div class="legend-item">
+                                <span class="legend-color" style="background-color: var(--success);"></span>
+                                <div class="legend-info">
+                                    <span class="legend-name">Active Savings</span>
+                                    <span class="legend-value" id="legend-savings-val">UGX 0</span>
+                                </div>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background-color: var(--primary);"></span>
+                                <div class="legend-info">
+                                    <span class="legend-name">Shares Capital</span>
+                                    <span class="legend-value" id="legend-shares-val">UGX 0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header-custom">
+                        <h4>Financial Transaction Activity</h4>
+                        <span class="chart-subtitle">Audit volume log over time</span>
+                    </div>
+                    <div class="line-chart-container">
+                        <svg width="100%" height="150" viewBox="0 0 500 150" preserveAspectRatio="none"
+                            id="trends-line-chart">
+                            <!-- Grid Lines -->
+                            <line x1="0" y1="37" x2="500" y2="37" stroke="var(--sidebar-border)" stroke-width="1"
+                                stroke-dasharray="4" />
+                            <line x1="0" y1="75" x2="500" y2="75" stroke="var(--sidebar-border)" stroke-width="1"
+                                stroke-dasharray="4" />
+                            <line x1="0" y1="112" x2="500" y2="112" stroke="var(--sidebar-border)" stroke-width="1"
+                                stroke-dasharray="4" />
+                            <line x1="0" y1="148" x2="500" y2="148" stroke="var(--text-muted)" stroke-width="1.5" />
+
+                            <!-- Area under path -->
+                            <path d="" fill="url(#chart-gradient)" opacity="0.15" id="trends-area" />
+                            <!-- Trend Line -->
+                            <path d="" fill="none" stroke="var(--primary)" stroke-width="3" id="trends-path"
+                                stroke-linecap="round" />
+
+                            <defs>
+                                <linearGradient id="chart-gradient" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="var(--primary)" />
+                                    <stop offset="100%" stop-color="var(--primary)" stop-opacity="0" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div class="chart-labels-x" id="trends-labels-x">
+                            <!-- JS generated times/dates -->
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -270,31 +475,424 @@
 
         <!-- Configuration Page -->
         <section id="page-settings" class="hidden">
-            <div class="data-card" style="max-width: 600px;">
-                <div class="card-header">
-                    <h3>System Parameter Configuration</h3>
+            <!-- Settings Tabs Navigation -->
+            <div class="settings-tabs-nav">
+                <button class="settings-tab-btn active" data-tab="financial">
+                    <i class="fa-solid fa-coins"></i> Financial Config
+                </button>
+                <button class="settings-tab-btn" data-tab="security">
+                    <i class="fa-solid fa-shield-halved"></i> Security
+                </button>
+                <button class="settings-tab-btn" data-tab="admins">
+                    <i class="fa-solid fa-user-shield"></i> Admin Users
+                </button>
+                <button class="settings-tab-btn" data-tab="profile">
+                    <i class="fa-solid fa-user-pen"></i> My Profile
+                </button>
+                <button class="settings-tab-btn" data-tab="system">
+                    <i class="fa-solid fa-circle-info"></i> System Info
+                </button>
+            </div>
+
+            <!-- FINANCIAL CONFIG TAB -->
+            <div class="settings-tab-content" id="settings-tab-financial">
+                <div class="data-card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-coins" style="color: var(--warning);"></i> Financial Parameters</h3>
+                        <span class="badge badge-info">Live Configuration</span>
+                    </div>
+                    <div style="padding: 2rem;">
+                        <form id="config-form" onsubmit="app.updateConfig(event)">
+                            <div class="settings-section-title">Loan Settings</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                                <div class="form-group">
+                                    <label>Default Loan Interest Rate (%)</label>
+                                    <input type="number" id="conf-interest" step="0.1" placeholder="8.0" required>
+                                    <small style="color: #64748b;">Annual interest rate applied to new loans.</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Loan Savings Multiplier (x)</label>
+                                    <input type="number" id="conf-loan-multiplier" step="0.1" placeholder="3.0">
+                                    <small style="color: #64748b;">Max borrowing size relative to total savings.</small>
+                                </div>
+                            </div>
+                            <div class="settings-section-title">Share & Member Settings</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                                <div class="form-group">
+                                    <label>Share Unit Price (UGX)</label>
+                                    <input type="number" id="conf-share-price" placeholder="10000" required>
+                                    <small style="color: #64748b;">Unit price for corporate shares.</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>New Member Registration Fee (UGX)</label>
+                                    <input type="number" id="conf-reg-fee" placeholder="10000">
+                                    <small style="color: #64748b;">One-time fee charged to new members.</small>
+                                </div>
+                            </div>
+                            <div class="settings-section-title">Account Limits</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                                <div class="form-group">
+                                    <label>Minimum Savings Balance (UGX)</label>
+                                    <input type="number" id="conf-min-balance" placeholder="5000">
+                                    <small style="color: #64748b;">Minimum balance required for members.</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Max Daily Withdrawal (UGX)</label>
+                                    <input type="number" id="conf-max-withdraw" placeholder="5000000">
+                                    <small style="color: #64748b;">Daily cap on member withdrawals.</small>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-floppy-disk"></i> Save Financial Settings
+                            </button>
+                        </form>
+                    </div>
                 </div>
-                <div style="padding: 2rem;">
-                    <form id="config-form" onsubmit="app.updateConfig(event)">
-                        <div class="form-group">
-                            <label>Default Loan Interest Rate (%)</label>
-                            <input type="number" id="conf-interest" step="0.1" placeholder="8.0" required>
-                            <small style="color: #64748b;">Annual interest rate applied to new loan
-                                applications.</small>
+            </div>
+
+            <!-- SECURITY TAB -->
+            <div class="settings-tab-content hidden" id="settings-tab-security">
+                <div class="data-card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-shield-halved" style="color: var(--success);"></i> Security &amp; Access Control</h3>
+                    </div>
+                    <div style="padding: 2rem; display: flex; flex-direction: column; gap: 1.25rem;">
+                        <div class="settings-section-title">System Access Switches</div>
+                        <div class="settings-toggle-row">
+                            <div>
+                                <div class="settings-toggle-label">Maintenance Mode</div>
+                                <div class="settings-toggle-desc">Mobile users see a maintenance notice. Admin access remains active.</div>
+                            </div>
+                            <label class="switch-toggle">
+                                <input type="checkbox" id="conf-maintenance">
+                                <span class="slider-round"></span>
+                            </label>
                         </div>
-                        <div class="form-group">
-                            <label>Share Unit Price (UGX)</label>
-                            <input type="number" id="conf-share-price" placeholder="10000" required>
-                            <small style="color: #64748b;">The price for a single corporate share in the Sacco.</small>
+                        <div class="settings-toggle-row">
+                            <div>
+                                <div class="settings-toggle-label">New Member Registrations</div>
+                                <div class="settings-toggle-desc">Allow new users to self-register via the mobile app.</div>
+                            </div>
+                            <label class="switch-toggle">
+                                <input type="checkbox" id="conf-allow-register" checked>
+                                <span class="slider-round"></span>
+                            </label>
                         </div>
-                        <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
-                            <i class="fa-solid fa-save"></i> Apply System Updates
-                        </button>
-                    </form>
+                        <div class="settings-toggle-row">
+                            <div>
+                                <div class="settings-toggle-label">Loan Applications</div>
+                                <div class="settings-toggle-desc">Allow members to submit loan applications via the mobile app.</div>
+                            </div>
+                            <label class="switch-toggle">
+                                <input type="checkbox" id="conf-allow-loans" checked>
+                                <span class="slider-round"></span>
+                            </label>
+                        </div>
+                        <div class="settings-section-title" style="margin-top: 0.5rem;">Login Security Status</div>
+                        <div class="security-status-grid">
+                            <div class="security-status-card">
+                                <i class="fa-solid fa-lock" style="color: var(--success);"></i>
+                                <div>
+                                    <div class="security-status-title">Password Policy</div>
+                                    <div class="security-status-sub">Min 8 chars, strength meter</div>
+                                </div>
+                                <span class="badge badge-success">Active</span>
+                            </div>
+                            <div class="security-status-card">
+                                <i class="fa-solid fa-ban" style="color: var(--warning);"></i>
+                                <div>
+                                    <div class="security-status-title">Brute-Force Protection</div>
+                                    <div class="security-status-sub">5 failed attempts = 5 min lockout</div>
+                                </div>
+                                <span class="badge badge-success">Active</span>
+                            </div>
+                            <div class="security-status-card">
+                                <i class="fa-solid fa-key" style="color: var(--primary);"></i>
+                                <div>
+                                    <div class="security-status-title">JWT Token Auth</div>
+                                    <div class="security-status-sub">24-hour token expiry</div>
+                                </div>
+                                <span class="badge badge-success">Active</span>
+                            </div>
+                            <div class="security-status-card">
+                                <i class="fa-solid fa-database" style="color: var(--info);"></i>
+                                <div>
+                                    <div class="security-status-title">Password Hashing</div>
+                                    <div class="security-status-sub">bcrypt with salt rounds</div>
+                                </div>
+                                <span class="badge badge-success">Active</span>
+                            </div>
+                        </div>
+                        <div style="margin-top: 0.5rem;">
+                            <button class="btn btn-primary" onclick="app.saveSecuritySettings()">
+                                <i class="fa-solid fa-floppy-disk"></i> Save Security Settings
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN USERS TAB -->
+            <div class="settings-tab-content hidden" id="settings-tab-admins">
+                <div class="data-card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-user-shield" style="color: var(--primary);"></i> Administrator Accounts</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="admins-table">
+                            <thead>
+                                <tr>
+                                    <th>Admin ID</th>
+                                    <th>Full Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Joined</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MY PROFILE TAB -->
+            <div class="settings-tab-content hidden" id="settings-tab-profile">
+                <div class="data-card" style="max-width: 680px;">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-user-pen" style="color: var(--info);"></i> Update My Profile</h3>
+                    </div>
+                    <div style="padding: 2rem;">
+                        <form id="profile-update-form" onsubmit="app.updateProfile(event)">
+                            <div class="settings-section-title">Personal Information</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                                <div class="form-group">
+                                    <label>Full Name</label>
+                                    <input type="text" id="prof-fullname" placeholder="Your full name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Username</label>
+                                    <input type="text" id="prof-username" placeholder="username" required>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                                <div class="form-group">
+                                    <label>Email Address</label>
+                                    <input type="email" id="prof-email" placeholder="you@sacco.ug" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Phone Number</label>
+                                    <input type="text" id="prof-phone" placeholder="07XXXXXXXX" maxlength="10" pattern="[0-9]{10}" title="Please enter exactly 10 digits">
+                                </div>
+                            </div>
+                            <div class="settings-section-title" style="margin-top: 0.5rem;">Change Password <span style="font-size: 0.72rem; font-weight: 500; color: var(--text-muted);">(leave blank to keep current)</span></div>
+                            <div class="form-group">
+                                <label>Current Password</label>
+                                <input type="password" id="prof-current-pass" placeholder="Your current password">
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                                <div class="form-group">
+                                    <label>New Password</label>
+                                    <input type="password" id="prof-new-pass" placeholder="New password">
+                                </div>
+                                <div class="form-group">
+                                    <label>Confirm New Password</label>
+                                    <input type="password" id="prof-confirm-pass" placeholder="Confirm new password">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-floppy-disk"></i> Update Profile
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SYSTEM INFO TAB -->
+            <div class="settings-tab-content hidden" id="settings-tab-system">
+                <div class="settings-info-grid">
+                    <div class="data-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-circle-info" style="color: var(--info);"></i> System Information</h3>
+                        </div>
+                        <div style="padding: 1.75rem;">
+                            <div class="sys-info-row"><span class="sys-info-label">Application</span><span class="sys-info-value">NANSANA YOUTH SACCO</span></div>
+                            <div class="sys-info-row"><span class="sys-info-label">Version</span><span class="sys-info-value">v2.0 &mdash; Admin Dashboard</span></div>
+                            <div class="sys-info-row"><span class="sys-info-label">Backend</span><span class="sys-info-value">Flask 3.x / Python</span></div>
+                            <div class="sys-info-row"><span class="sys-info-label">Database</span><span class="sys-info-value">MySQL (PyMySQL)</span></div>
+                            <div class="sys-info-row"><span class="sys-info-label">Auth System</span><span class="sys-info-value">JWT / bcrypt</span></div>
+                            <div class="sys-info-row"><span class="sys-info-label">API Base URL</span><span class="sys-info-value" style="font-family: monospace; font-size: 0.8rem;">http://127.0.0.1:8000/api</span></div>
+                            <div class="sys-info-row" style="border: none; padding-bottom: 0;"><span class="sys-info-label">API Status</span><span id="sys-api-status" class="badge badge-pending">Checking...</span></div>
+                        </div>
+                    </div>
+                    <div class="data-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-chart-bar" style="color: var(--success);"></i> Live Statistics</h3>
+                        </div>
+                        <div style="padding: 1.75rem;">
+                            <div class="sys-info-row"><span class="sys-info-label">Total Members</span><span class="sys-info-value" id="sys-stat-users">&mdash;</span></div>
+                            <div class="sys-info-row"><span class="sys-info-label">Total Savings</span><span class="sys-info-value" id="sys-stat-savings">&mdash;</span></div>
+                            <div class="sys-info-row"><span class="sys-info-label">Total Shares</span><span class="sys-info-value" id="sys-stat-shares">&mdash;</span></div>
+                            <div class="sys-info-row"><span class="sys-info-label">Pending Loans</span><span class="sys-info-value" id="sys-stat-loans">&mdash;</span></div>
+                            <div class="sys-info-row" style="border: none; padding-bottom: 0;"><span class="sys-info-label">Capital Disbursed</span><span class="sys-info-value" id="sys-stat-disbursed">&mdash;</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="data-card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-triangle-exclamation" style="color: var(--warning);"></i> Danger Zone</h3>
+                    </div>
+                    <div style="padding: 1.75rem; display: flex; flex-direction: column; gap: 1rem;">
+                        <div class="danger-zone-item">
+                            <div>
+                                <div class="settings-toggle-label">Force All Sessions Logout</div>
+                                <div class="settings-toggle-desc">Invalidates all active sessions. Use in case of a security breach.</div>
+                            </div>
+                            <button class="btn btn-danger btn-sm" onclick="app.forceLogoutAll()">
+                                <i class="fa-solid fa-power-off"></i> Force Logout
+                            </button>
+                        </div>
+                        <div class="danger-zone-item">
+                            <div>
+                                <div class="settings-toggle-label">Export All Data (CSV)</div>
+                                <div class="settings-toggle-desc">Download a full export of members, transactions, and loans.</div>
+                            </div>
+                            <button class="btn btn-primary btn-sm" onclick="app.exportData()">
+                                <i class="fa-solid fa-file-export"></i> Export Data
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
     </main>
+
+    <!-- Modals Overlay -->
+    <div id="modal-container" class="modal-overlay hidden">
+        <!-- Register Member Modal -->
+        <div class="modal-card hidden" id="modal-register-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-plus text-success"></i> Register New Sacco Member</h3>
+                <button class="modal-close-btn" onclick="app.closeModals()">&times;</button>
+            </div>
+            <form id="modal-register-form">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="m-reg-fullname" placeholder="Mariam Namazzi" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" id="m-reg-username" placeholder="mariam_n" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="m-reg-email" placeholder="mariam@gmail.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" id="m-reg-phone" placeholder="07XXXXXXXX" maxlength="10" pattern="[0-9]{10}" title="Please enter exactly 10 digits" required>
+                </div>
+                <div class="form-group">
+                    <label>Set Account Password</label>
+                    <input type="password" id="m-reg-password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary"
+                    style="width: 100%; justify-content: center; margin-top: 1rem; padding: 0.85rem; border-radius: 10px;">
+                    Create Account
+                </button>
+            </form>
+        </div>
+
+        <!-- Deposit Funds Modal -->
+        <div class="modal-card hidden" id="modal-deposit-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-piggy-bank" style="color: var(--success)"></i> Manual Teller Deposit</h3>
+                <button class="modal-close-btn" onclick="app.closeModals()">&times;</button>
+            </div>
+            <form id="modal-deposit-form">
+                <div class="form-group">
+                    <label>Select Member Account</label>
+                    <select id="m-dep-user-select" class="form-select" required>
+                        <option value="" disabled selected>Loading members...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Deposit Amount (UGX)</label>
+                    <input type="number" id="m-dep-amount" min="1000" step="500" placeholder="50,000" required>
+                </div>
+                <button type="submit" class="btn btn-primary"
+                    style="width: 100%; justify-content: center; margin-top: 1rem; padding: 0.85rem; border-radius: 10px;">
+                    Record Deposit
+                </button>
+            </form>
+        </div>
+
+        <!-- Withdraw Cash Modal -->
+        <div class="modal-card hidden" id="modal-withdraw-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-money-bill-transfer" style="color: var(--danger)"></i> Manual Teller
+                    Withdrawal</h3>
+                <button class="modal-close-btn" onclick="app.closeModals()">&times;</button>
+            </div>
+            <form id="modal-withdraw-form">
+                <div class="form-group">
+                    <label>Select Member Account</label>
+                    <select id="m-with-user-select" class="form-select" required>
+                        <option value="" disabled selected>Loading members...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Withdrawal Amount (UGX)</label>
+                    <input type="number" id="m-with-amount" min="1000" step="500" placeholder="20,000" required>
+                </div>
+                <button type="submit" class="btn btn-danger"
+                    style="width: 100%; justify-content: center; margin-top: 1rem; padding: 0.85rem; border-radius: 10px;">
+                    Record Withdrawal
+                </button>
+            </form>
+        </div>
+
+        <!-- New Loan Request Modal -->
+        <div class="modal-card hidden" id="modal-loan-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-hand-holding-dollar" style="color: var(--primary)"></i> Record Member Loan
+                </h3>
+                <button class="modal-close-btn" onclick="app.closeModals()">&times;</button>
+            </div>
+            <form id="modal-loan-form">
+                <div class="form-group">
+                    <label>Select Applicant</label>
+                    <select id="m-loan-user-select" class="form-select" required>
+                        <option value="" disabled selected>Loading members...</option>
+                    </select>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Loan Sum (UGX)</label>
+                        <input type="number" id="m-loan-amount" min="5000" step="1000" placeholder="500,000" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Duration (Months)</label>
+                        <input type="number" id="m-loan-months" min="1" max="60" placeholder="12" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Financial Justification</label>
+                    <textarea id="m-loan-reason" rows="3" placeholder="Explain the loan purpose..." required
+                        style="width: 100%; padding: 0.95rem 1.25rem; border: 1px solid var(--sidebar-border); border-radius: 0.75rem; background: var(--background); color: var(--text-main); font-family: inherit; font-size: 0.95rem; outline: none; transition: all 0.2s; resize: vertical;"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary"
+                    style="width: 100%; justify-content: center; margin-top: 1rem; padding: 0.85rem; border-radius: 10px;">
+                    Submit Application
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
 
     <script src="app.js"></script>
 </body>
