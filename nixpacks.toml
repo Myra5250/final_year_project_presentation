@@ -2,7 +2,7 @@
 nixPkgs = ["python311Full", "gcc"]
 
 [phases.install]
-cmds = ["pip install -r backend/requirements.txt"]
+cmds = ["python -m pip install -r backend/requirements.txt"]
 
 [start]
 cmd = "cd backend && gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
