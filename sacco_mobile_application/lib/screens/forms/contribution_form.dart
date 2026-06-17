@@ -25,7 +25,7 @@ class _ContributionFormState extends State<ContributionForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please enter a valid amount.'),
-          backgroundColor: Colors.orange,
+          backgroundColor: Color(0xFF009639),
         ),
       );
       return;
@@ -36,7 +36,7 @@ class _ContributionFormState extends State<ContributionForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please enter a positive deposit amount.'),
-          backgroundColor: Colors.orange,
+          backgroundColor: Color(0xFF009639),
         ),
       );
       return;
@@ -111,11 +111,11 @@ class _ContributionFormState extends State<ContributionForm> {
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey),
             ),
             const SizedBox(height: 12),
-            _buildMethodTile('Mobile Money', Icons.phone_android, Colors.orange),
+            _buildMethodTile('Mobile Money', Icons.phone_android, const Color(0xFF009639)),
             const SizedBox(height: 12),
-            _buildMethodTile('Bank Transfer', Icons.account_balance, Colors.blue),
+            _buildMethodTile('Bank Transfer', Icons.account_balance, const Color(0xFF00B84A)),
             const SizedBox(height: 12),
-            _buildMethodTile('Cash Deposit', Icons.payments, Colors.green),
+            _buildMethodTile('Cash Deposit', Icons.payments, const Color(0xFF007A2E)),
             const SizedBox(height: 40),
             SizedBox(
               width: double.infinity,
@@ -123,7 +123,7 @@ class _ContributionFormState extends State<ContributionForm> {
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _handleContribution,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green.shade700,
+                  backgroundColor: const Color(0xFF009639),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                 ),
                 child: _isLoading
@@ -150,7 +150,7 @@ class _ContributionFormState extends State<ContributionForm> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(15),
           border: Border.all(
-            color: isSelected ? Colors.green.shade700 : Colors.grey.shade200,
+            color: isSelected ? const Color(0xFF009639) : Colors.grey.shade200,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -165,10 +165,12 @@ class _ContributionFormState extends State<ContributionForm> {
               child: Icon(icon, color: color, size: 20),
             ),
             const SizedBox(width: 15),
-            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Expanded(
+              child: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold)),
+            ),
             const Spacer(),
             if (isSelected)
-              Icon(Icons.check_circle, color: Colors.green.shade700, size: 20),
+              Icon(Icons.check_circle, color: const Color(0xFF009639), size: 20),
           ],
         ),
       ),
@@ -184,7 +186,7 @@ class _ContributionFormState extends State<ContributionForm> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.check_circle, color: Colors.green, size: 60),
+            const Icon(Icons.check_circle, color: const Color(0xFF009639), size: 60),
             const SizedBox(height: 16),
             const Text(
               'Transaction Successful',
@@ -204,7 +206,7 @@ class _ContributionFormState extends State<ContributionForm> {
                   Navigator.pop(context); // Close dialog
                   Navigator.pop(context); // Go back to savings
                 },
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.green.shade700),
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF009639)),
                 child: const Text('OK', style: TextStyle(color: Colors.white)),
               ),
             ),

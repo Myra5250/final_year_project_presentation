@@ -1,24 +1,28 @@
 import 'dart:convert';
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, kReleaseMode;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
   // ─── Dynamic Base URL ────────────────────────────────────────────────────────
-  // Picks the right default depending on the platform/environment:
-  //   • Web / Windows / macOS / Linux   → 127.0.0.1 (true localhost)
-  //   • Android (emulator)              → 10.0.2.2  (emulator bridge to host)
-  //   • iOS simulator                   → 127.0.0.1
+  // In RELEASE builds → automatically uses the deployed Render backend.
+  // In DEBUG builds   → uses localhost (change _devDefault for your local IP).
   // A custom URL saved by the user in Settings always takes priority.
+
+  /// 🚀 PRODUCTION: Update this to your Render URL after deploying.
+  static const String _productionUrl = 'https://youth-sacco-backend.onrender.com/api';
+
+  /// 🛠  DEVELOPMENT: Local server address.
+  static const String _devDefault = 'http://127.0.0.1:8000/api';
+
   static String get _platformDefault {
-    if (kIsWeb) return 'http://127.0.0.1:8000/api';
-    try {
-      if (Platform.isAndroid) return 'http://10.0.2.2:8000/api';
-      if (Platform.isIOS)     return 'http://127.0.0.1:8000/api';
-    } catch (_) {}
-    // Desktop (Windows / macOS / Linux) or unknown
-    return 'http://127.0.0.1:8000/api';
+    if (kReleaseMode) {
+      // Production build — always use the deployed backend.
+      return _productionUrl;
+    }
+    // Debug / profile build — use local dev server.
+    // Android emulator: change to http://10.0.2.2:8000/api
+    return _devDefault;
   }
 
   // Runtime-changeable URL (starts with the platform default; may be
@@ -101,6 +105,11 @@ class ApiService {
     await prefs.remove('remember_me');
   }
 
+  static Future<void> updateLocalUser(Map<String, dynamic> user) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_info', json.encode(user));
+  }
+
   static Future<bool> getRememberMe() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool('remember_me') ?? false;
@@ -109,6 +118,22 @@ class ApiService {
   static Future<void> setRememberMe(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('remember_me', value);
+  }
+
+  static Future<bool> hasCompletedOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('onboarding_completed') ?? false;
+  }
+
+  static Future<void> setOnboardingCompleted() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_completed', true);
+  }
+
+  static Future<bool> isLoggedIn() async {
+    final token = await getToken();
+    final user = await getUser();
+    return token != null && user != null;
   }
 
   // ─── Common Headers ──────────────────────────────────────────────────────────
@@ -247,6 +272,84 @@ class ApiService {
         return {'success': true, 'config': json.decode(response.body)};
       }
       return {'success': false, 'error': 'Failed to load system configuration'};
+    } catch (e) {
+      return {'success': false, 'error': 'Cannot connect to server.'};
+    }
+  }
+
+  // ─── Profile ──────────────────────────────────────────────────────────────────
+  static Future<Map<String, dynamic>> getProfile() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/user/profile'),
+        headers: await _getHeaders(),
+      ).timeout(const Duration(seconds: 5));
+
+      final resBody = json.decode(response.body);
+      if (response.statusCode == 200) {
+        return {'success': true, 'user': resBody['user']};
+      }
+      return {'success': false, 'error': resBody['error'] ?? resBody['message'] ?? 'Failed to load profile'};
+    } catch (e) {
+      return {'success': false, 'error': 'Cannot connect to server.'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> updateProfile({
+    required String fullName,
+    required String phoneNumber,
+  }) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$baseUrl/user/profile'),
+        headers: await _getHeaders(),
+        body: json.encode({
+          'full_name': fullName,
+          'phone_number': phoneNumber,
+        }),
+      ).timeout(const Duration(seconds: 8));
+
+      final resBody = json.decode(response.body);
+      if (response.statusCode == 200) {
+        final user = resBody['user'] as Map<String, dynamic>;
+        final existing = await getUser();
+        if (existing != null) {
+          final merged = {...existing, ...user};
+          await updateLocalUser(merged);
+        } else {
+          await updateLocalUser(user);
+        }
+        return {
+          'success': true,
+          'message': resBody['message'] ?? 'Profile updated successfully',
+          'user': user,
+        };
+      }
+      return {'success': false, 'error': resBody['error'] ?? resBody['message'] ?? 'Failed to update profile'};
+    } catch (e) {
+      return {'success': false, 'error': 'Cannot connect to server.'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/user/change-password'),
+        headers: await _getHeaders(),
+        body: json.encode({
+          'current_password': currentPassword,
+          'new_password': newPassword,
+        }),
+      ).timeout(const Duration(seconds: 8));
+
+      final resBody = json.decode(response.body);
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': resBody['message'] ?? 'Password changed successfully'};
+      }
+      return {'success': false, 'error': resBody['error'] ?? resBody['message'] ?? 'Failed to change password'};
     } catch (e) {
       return {'success': false, 'error': 'Cannot connect to server.'};
     }
@@ -392,6 +495,33 @@ class ApiService {
         };
       }
       return {'success': false, 'error': resBody['error'] ?? 'Failed to deposit'};
+    } catch (e) {
+      return {'success': false, 'error': 'Cannot connect to server.'};
+    }
+  }
+
+  // ─── Withdraw ──────────────────────────────────────────────────────────────────
+  static Future<Map<String, dynamic>> withdraw(double amount) async {
+    try {
+      final user = await getUser();
+      if (user == null) return {'success': false, 'error': 'User session not found'};
+
+      final userId = user['id'];
+      final response = await http.post(
+        Uri.parse('$baseUrl/withdraw'),
+        headers: await _getHeaders(),
+        body: json.encode({'user_id': userId, 'amount': amount}),
+      ).timeout(const Duration(seconds: 5));
+
+      final resBody = json.decode(response.body);
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': resBody['message'] ?? 'Withdrawal successful',
+          'reference': resBody['reference'],
+        };
+      }
+      return {'success': false, 'error': resBody['error'] ?? 'Failed to withdraw'};
     } catch (e) {
       return {'success': false, 'error': 'Cannot connect to server.'};
     }

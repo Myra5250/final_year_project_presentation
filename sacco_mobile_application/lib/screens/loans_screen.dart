@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/api_service.dart';
+import '../widgets/shimmer_loading.dart';
 
 class LoansScreen extends StatefulWidget {
   const LoansScreen({super.key});
@@ -103,15 +104,23 @@ class _LoansScreenState extends State<LoansScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Repay Loan', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const Expanded(
+                    child: Text(
+                      'Repay Loan',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
                   IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
                 ],
               ),
               const SizedBox(height: 15),
               Text(
                 'Loan ID: #$loanId • Original Amount: ${_formatCurrency(loanAmount)}',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
               ),
               const SizedBox(height: 5),
@@ -174,7 +183,7 @@ class _LoansScreenState extends State<LoansScreen> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(res['message'] ?? 'Loan repayment successful!'),
-                                  backgroundColor: const Color(0xFF0F5132),
+                                  backgroundColor: const Color(0xFF009639),
                                 ),
                               );
                               _loadLoansData();
@@ -189,7 +198,7 @@ class _LoansScreenState extends State<LoansScreen> {
                           }
                         },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0F5132),
+                    backgroundColor: const Color(0xFF009639),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                   ),
                   child: isRepaying
@@ -232,7 +241,7 @@ class _LoansScreenState extends State<LoansScreen> {
               height: 50,
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F5132)),
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF009639)),
                 child: const Text('Got it', style: TextStyle(color: Colors.white)),
               ),
             ),
@@ -265,9 +274,9 @@ class _LoansScreenState extends State<LoansScreen> {
       backgroundColor: const Color(0xFFF8FAFC),
       body: RefreshIndicator(
         onRefresh: _loadLoansData,
-        color: const Color(0xFF0F5132),
+        color: const Color(0xFF009639),
         child: _isLoading
-            ? const Center(child: CircularProgressIndicator(color: Color(0xFF0F5132)))
+            ? const PageShimmer()
             : SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
@@ -301,7 +310,7 @@ class _LoansScreenState extends State<LoansScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.pushNamed(context, '/loan_application_form').then((_) => _loadLoansData()),
-        backgroundColor: const Color(0xFF0F5132),
+        backgroundColor: const Color(0xFF009639),
         icon: const Icon(Icons.add_task_rounded, color: Colors.white),
         label: const Text('Apply for Loan', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
@@ -309,13 +318,14 @@ class _LoansScreenState extends State<LoansScreen> {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final topPadding = MediaQuery.of(context).padding.top;
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 60, 20, 30),
+      padding: EdgeInsets.fromLTRB(20, topPadding + 12, 20, 30),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF0F5132), Color(0xFF198754)],
+          colors: [Color(0xFF009639), Color(0xFF00B84A)],
         ),
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(35),
@@ -372,21 +382,24 @@ class _LoansScreenState extends State<LoansScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Active Loan Balance',
-                style: TextStyle(color: Colors.grey, fontSize: 14),
+              const Expanded(
+                child: Text(
+                  'Active Loan Balance',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: Colors.grey, fontSize: 14),
+                ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0F5132).withOpacity(0.08),
+                  color: const Color(0xFF009639).withOpacity(0.08),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Text(
                   'On Track',
-                  style: TextStyle(color: Color(0xFF0F5132), fontSize: 12, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: Color(0xFF009639), fontSize: 12, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -403,11 +416,9 @@ class _LoansScreenState extends State<LoansScreen> {
           const SizedBox(height: 25),
           Row(
             children: [
-              _buildLoanStat('Duration', '$duration Months'),
-              const Spacer(),
-              _buildLoanStat('Disbursed Date', startDateStr.isNotEmpty ? _formatDateTime(startDateStr) : 'N/A'),
-              const Spacer(),
-              _buildLoanStat('Interest Rate', '$interest%'),
+              Expanded(child: _buildLoanStat('Duration', '$duration Months')),
+              Expanded(child: _buildLoanStat('Disbursed', startDateStr.isNotEmpty ? _formatDateTime(startDateStr) : 'N/A')),
+              Expanded(child: _buildLoanStat('Interest', '$interest%')),
             ],
           ),
           const SizedBox(height: 25),
@@ -419,7 +430,7 @@ class _LoansScreenState extends State<LoansScreen> {
               icon: const Icon(Icons.monetization_on, color: Colors.white),
               label: const Text('Repay Active Loan', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0F5132),
+                backgroundColor: const Color(0xFF009639),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
               ),
             ),
@@ -433,9 +444,9 @@ class _LoansScreenState extends State<LoansScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+        Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
         const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+        Text(value, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
       ],
     );
   }
@@ -478,19 +489,19 @@ class _LoansScreenState extends State<LoansScreen> {
 
         switch (status) {
           case 'APPROVED':
-            color = const Color(0xFF198754);
+            color = const Color(0xFF00B84A);
             icon = Icons.check_circle_outline;
             break;
           case 'REJECTED':
-            color = Colors.red;
+            color = Colors.red.shade400;
             icon = Icons.cancel_outlined;
             break;
           case 'PAID':
-            color = Colors.blue;
+            color = const Color(0xFF007A2E);
             icon = Icons.done_all;
             break;
           default: // PENDING
-            color = const Color(0xFF0F5132);
+            color = const Color(0xFF009639);
             icon = Icons.pending_actions;
         }
 
@@ -521,7 +532,7 @@ class _LoansScreenState extends State<LoansScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(reason, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    Text(reason, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold)),
                     Text('Applied: ${_formatDateTime(dateStr)}', style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
                   ],
                 ),

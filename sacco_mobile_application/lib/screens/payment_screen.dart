@@ -70,15 +70,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final topPadding = MediaQuery.of(context).padding.top;
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 60, 20, 30),
-      decoration: BoxDecoration(
+      padding: EdgeInsets.fromLTRB(20, topPadding + 12, 20, 30),
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Colors.orange.shade800, Colors.orange.shade500],
+          colors: [Color(0xFF009639), Color(0xFF00B84A)],
         ),
-        borderRadius: const BorderRadius.only(
+        borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(35),
           bottomRight: Radius.circular(35),
         ),
@@ -92,9 +93,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
               ),
               const SizedBox(width: 5),
-              const Text(
-                'Payments & Transfers',
-                style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+              const Expanded(
+                child: Text(
+                  'Payments & Transfers',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ),
@@ -106,12 +111,23 @@ class _PaymentScreenState extends State<PaymentScreen> {
               borderRadius: BorderRadius.circular(15),
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Available Cash Balance', style: TextStyle(color: Colors.white, fontSize: 13)),
-                Text(
-                  _formatCurrency(_cashBalance),
-                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                const Expanded(
+                  child: Text(
+                    'Available Cash Balance',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: Colors.white, fontSize: 13),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    _formatCurrency(_cashBalance),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             ),
@@ -130,12 +146,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
       crossAxisSpacing: 15,
       childAspectRatio: 1.3,
       children: [
-        _buildPaymentCategory(context, Icons.swap_horiz, 'Transfer Money', Colors.green, isRealTransfer: true),
-        _buildPaymentCategory(context, Icons.phone_android, 'Airtime', Colors.blue),
-        _buildPaymentCategory(context, Icons.electric_bolt, 'Electricity', Colors.amber),
-        _buildPaymentCategory(context, Icons.water_drop, 'Water', Colors.lightBlue),
-        _buildPaymentCategory(context, Icons.tv, 'TV Subscription', Colors.red),
-        _buildPaymentCategory(context, Icons.school, 'School Fees', Colors.purple),
+        _buildPaymentCategory(context, Icons.swap_horiz, 'Transfer Money', const Color(0xFF009639), isRealTransfer: true),
+        _buildPaymentCategory(context, Icons.phone_android, 'Airtime', const Color(0xFF00B84A)),
+        _buildPaymentCategory(context, Icons.electric_bolt, 'Electricity', const Color(0xFF007A2E)),
+        _buildPaymentCategory(context, Icons.water_drop, 'Water', const Color(0xFF009639)),
+        _buildPaymentCategory(context, Icons.tv, 'TV Subscription', const Color(0xFF00B84A)),
+        _buildPaymentCategory(context, Icons.school, 'School Fees', const Color(0xFF007A2E)),
       ],
     );
   }
@@ -178,7 +194,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
               style: TextStyle(
                 fontWeight: FontWeight.bold, 
                 fontSize: 13,
-                color: isRealTransfer ? Colors.green.shade800 : Colors.black87
+                color: isRealTransfer ? const Color(0xFF007A2E) : Colors.black87
               ),
             ),
           ],
@@ -190,9 +206,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Widget _buildRecentPayees() {
     return Column(
       children: [
-        _buildPayeeItem('NWSC Water', 'Utility', Icons.water_drop, Colors.blue),
-        _buildPayeeItem('Umeme Yaka', 'Utility', Icons.electric_bolt, Colors.amber),
-        _buildPayeeItem('MTN Airtime', 'Personal', Icons.phone_android, Colors.yellow.shade800),
+        _buildPayeeItem('NWSC Water', 'Utility', Icons.water_drop, const Color(0xFF009639)),
+        _buildPayeeItem('Umeme Yaka', 'Utility', Icons.electric_bolt, const Color(0xFF00B84A)),
+        _buildPayeeItem('MTN Airtime', 'Personal', Icons.phone_android, const Color(0xFF007A2E)),
       ],
     );
   }
@@ -257,9 +273,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Transfer to Member', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const Expanded(
+                    child: Text(
+                      'Transfer to Member',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
                   IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
                 ],
               ),
@@ -342,7 +364,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(res['message'] ?? 'Transfer successful!'),
-                                  backgroundColor: Colors.green,
+                                  backgroundColor: const Color(0xFF009639),
                                 ),
                               );
                               _loadBalance();
@@ -357,7 +379,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           }
                         },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green.shade700,
+                    backgroundColor: const Color(0xFF009639),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                   ),
                   child: isTransferring
@@ -401,9 +423,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Pay $title', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                Expanded(
+                  child: Text(
+                    'Pay $title',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ),
                 IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
               ],
             ),
@@ -442,12 +470,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Mock Payment of $title Successful!'),
-                      backgroundColor: Colors.orange.shade700,
+                      backgroundColor: const Color(0xFF00B84A),
                     ),
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange.shade700,
+                  backgroundColor: const Color(0xFF009639),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                 ),
                 child: const Text('Confirm Payment', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),

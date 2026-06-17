@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'services/api_service.dart';
+import 'theme/app_colors.dart';
 
 // Import screens
 import 'screens/splash1.dart';
@@ -9,6 +10,7 @@ import 'screens/public/welcome_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/dashboard_screen.dart';
+import 'screens/services_screen.dart';
 import 'screens/savings_screen.dart';
 import 'screens/loans_screen.dart';
 import 'screens/profile_screen.dart';
@@ -21,6 +23,7 @@ import 'screens/forms/loan_application_form.dart';
 import 'screens/mfa_verification_screen.dart';
 import 'screens/forgot_password_screen.dart';
 import 'screens/reset_password_screen.dart';
+import 'screens/info/content_screen.dart';
 
 
 void main() async {
@@ -42,15 +45,14 @@ class SaccoApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0F5132),
-          primary: const Color(0xFF0F5132),
-          secondary: const Color(0xFF198754),
-          surface: Colors.white,
-          background: const Color(0xFFF8FAFC),
+          seedColor: AppColors.primary,
+          primary: AppColors.primary,
+          secondary: AppColors.primaryLight,
+          surface: AppColors.surface,
         ),
-        scaffoldBackgroundColor: const Color(0xFFF8FAFC),
-        cardTheme: CardTheme(
-          color: Colors.white,
+        scaffoldBackgroundColor: AppColors.background,
+        cardTheme: CardThemeData(
+          color: AppColors.surface,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
@@ -59,7 +61,7 @@ class SaccoApp extends StatelessWidget {
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: const Color(0xFFF8FAFC),
+          fillColor: AppColors.background,
           contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
@@ -71,15 +73,15 @@ class SaccoApp extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: Color(0xFF0F5132), width: 2),
+            borderSide: const BorderSide(color: AppColors.primary, width: 2),
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF0F5132),
+            backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             elevation: 2,
-            shadowColor: const Color(0xFF0F5132).withOpacity(0.2),
+            shadowColor: AppColors.primary.withOpacity(0.2),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -99,6 +101,7 @@ class SaccoApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
         '/dashboard': (context) => const MainContainer(),
+        '/services': (context) => const ServicesScreen(),
         '/savings': (context) => const SavingsScreen(),
         '/loans': (context) => const LoansScreen(),
         '/profile': (context) => const ProfileScreen(),
@@ -110,6 +113,9 @@ class SaccoApp extends StatelessWidget {
         '/mfa_verification': (context) => const MfaVerificationScreen(),
         '/forgot_password': (context) => const ForgotPasswordScreen(),
         '/reset_password': (context) => const ResetPasswordScreen(),
+        '/faq': (context) => const ContentScreen(type: ContentPageType.faq),
+        '/terms': (context) => const ContentScreen(type: ContentPageType.terms),
+        '/help': (context) => const ContentScreen(type: ContentPageType.help),
       },
     );
   }

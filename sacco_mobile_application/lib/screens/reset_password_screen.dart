@@ -72,7 +72,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.check_circle_rounded, color: Color(0xFF0F5132), size: 64),
+                const Icon(Icons.check_circle_rounded, color: Color(0xFF009639), size: 64),
                 const SizedBox(height: 16),
                 const Text('Password Reset!', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
@@ -89,7 +89,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       Navigator.of(ctx).pop();
                       Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
                     },
-                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F5132), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF009639), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                     child: const Text('Go to Login', style: TextStyle(color: Colors.white)),
                   ),
                 ),
@@ -127,13 +127,13 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   height: 90,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF0F5132), Color(0xFF198754)],
+                      colors: [Color(0xFF009639), Color(0xFF00B84A)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(28),
                     boxShadow: [
-                      BoxShadow(color: const Color(0xFF0F5132).withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 8)),
+                      BoxShadow(color: const Color(0xFF009639).withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 8)),
                     ],
                   ),
                   child: const Icon(Icons.key_rounded, color: Colors.white, size: 44),
@@ -143,7 +143,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
               const Text(
                 'Create New Password',
-                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xFF0F5132)),
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xFF009639)),
               ),
               const SizedBox(height: 10),
               Text(
@@ -223,10 +223,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _resetPassword,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0F5132),
+                          backgroundColor: const Color(0xFF009639),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                           elevation: 4,
-                          shadowColor: const Color(0xFF0F5132).withOpacity(0.3),
+                          shadowColor: const Color(0xFF009639).withOpacity(0.3),
                         ),
                         child: _isLoading
                             ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))

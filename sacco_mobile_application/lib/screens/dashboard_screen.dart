@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../widgets/custom_images.dart';
 import '../services/api_service.dart';
+import '../theme/app_colors.dart';
+import '../widgets/shimmer_loading.dart';
+import '../utils/app_support.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -19,6 +22,7 @@ class _LoginUser {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   bool _isLoading = true;
+  String? _selectedStatementPeriod;
   String _fullName = 'Member';
   double _balance = 0.0;
   double _savingsBalance = 0.0;
@@ -111,11 +115,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       backgroundColor: Colors.grey.shade50,
       body: RefreshIndicator(
         onRefresh: _loadDashboardData,
-        color: const Color(0xFF0F5132),
+        color: AppColors.primary,
         child: _isLoading
-            ? const Center(
-                child: CircularProgressIndicator(color: Color(0xFF0F5132)),
-              )
+            ? const DashboardShimmer()
             : SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
@@ -146,14 +148,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final topPadding = MediaQuery.of(context).padding.top;
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 60, 20, 30),
+      padding: EdgeInsets.fromLTRB(20, topPadding + 16, 20, 30),
       decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF0F5132), Color(0xFF198754)],
-        ),
+        gradient: AppColors.headerGradient,
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(35),
           bottomRight: Radius.circular(35),
@@ -162,37 +161,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.white24,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
-                ),
-                child: const Icon(Icons.person, color: Colors.white, size: 30),
-              ),
-              const SizedBox(width: 15),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Welcome back,',
-                    style: TextStyle(color: Colors.white70, fontSize: 14),
-                  ),
-                  Text(
-                    _fullName,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+          Expanded(
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Scaffold.of(context).openDrawer();
+                  },
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: Colors.white24,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
                     ),
+                    child: const Icon(Icons.person, color: Colors.white, size: 30),
                   ),
-                ],
-              ),
-            ],
+                ),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Welcome back,',
+                        style: TextStyle(color: Colors.white70, fontSize: 14),
+                      ),
+                      Text(
+                        _fullName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
           IconButton(
             onPressed: () {
@@ -214,15 +224,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(25),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF0F5132), Color(0xFF1E7E34)],
-        ),
+        gradient: AppColors.cardGradient,
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0F5132).withOpacity(0.25),
+            color: AppColors.primary.withOpacity(0.25),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -269,22 +275,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 25),
           Row(
             children: [
-              _buildBalanceStat(
-                'Shares Balance',
-                '${_formatCurrency(_sharesBalance)} (${(_sharesBalance / _sharePrice).toStringAsFixed(0)} Shares)',
-                Icons.pie_chart,
-                Colors.white,
-                labelColor: Colors.white70,
+              Expanded(
+                child: _buildBalanceStat(
+                  'Shares Balance',
+                  '${_formatCurrency(_sharesBalance)} (${(_sharesBalance / _sharePrice).toStringAsFixed(0)} Shares)',
+                  Icons.pie_chart,
+                  Colors.white,
+                  labelColor: Colors.white70,
+                ),
               ),
-              const Spacer(),
               Container(width: 1, height: 40, color: Colors.white.withOpacity(0.3)),
-              const Spacer(),
-              _buildBalanceStat(
-                'Active Loan',
-                _activeLoanBalance > 0 ? _formatCurrency(_activeLoanBalance) : 'No Loan',
-                Icons.account_balance_wallet,
-                const Color(0xFFFFC107),
-                labelColor: Colors.white70,
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 15),
+                  child: _buildBalanceStat(
+                    'Active Loan',
+                    _activeLoanBalance > 0 ? _formatCurrency(_activeLoanBalance) : 'No Loan',
+                    Icons.account_balance_wallet,
+                    Colors.white,
+                    labelColor: Colors.white70,
+                  ),
+                ),
               ),
             ],
           ),
@@ -301,19 +312,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             Icon(icon, size: 14, color: color),
             const SizedBox(width: 5),
-            Text(
-              label,
-              style: TextStyle(color: labelColor, fontSize: 12),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: labelColor, fontSize: 12),
+              ),
             ),
           ],
         ),
         const SizedBox(height: 5),
-        Text(
-          value,
-          style: TextStyle(
-            color: color,
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
           ),
         ),
       ],
@@ -322,33 +343,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildSectionHeader(BuildContext context, String title) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
+        Expanded(
+          child: Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
           ),
         ),
-        Row(
-          children: [
-            if (title == 'Recent Activity')
-              IconButton(
-                onPressed: () => _showStatementGenerator(context),
-                icon: Icon(Icons.description_outlined, color: Colors.green.shade700, size: 20),
-                tooltip: 'Generate Statement',
-              ),
-            TextButton(
-              onPressed: () {
-                if (title == 'Quick Actions') return;
-                Navigator.pushNamed(context, title == 'Recent Activity' ? '/savings' : '/loans').then((_) => _loadDashboardData());
-              },
-              child: Text('See All', style: TextStyle(color: Colors.green.shade700)),
-            ),
-          ],
-        ),
+        if (title == 'Recent Activity')
+          IconButton(
+            onPressed: () => _showStatementGenerator(context),
+            icon: Icon(Icons.description_outlined, color: AppColors.primaryLight, size: 20),
+            tooltip: 'Generate Statement',
+          ),
+        if (title != 'Quick Actions')
+          TextButton(
+            onPressed: () {
+              Navigator.pushNamed(context, title == 'Recent Activity' ? '/savings' : '/loans')
+                  .then((_) => _loadDashboardData());
+            },
+            child: Text('See All', style: TextStyle(color: AppColors.primaryLight)),
+          ),
       ],
     );
   }
@@ -381,9 +402,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(height: 20),
             const Text('Generate a summary of your financial activity.', style: TextStyle(color: Colors.grey)),
             const SizedBox(height: 30),
-            _buildStatementOption('Last 30 Days', 'Summary of recent contributions'),
-            _buildStatementOption('Last 6 Months', 'Summary of financial history'),
-            _buildStatementOption('Custom Range', 'Select specific dates'),
+            _buildStatementOption(context, 'Last 30 Days', 'Summary of recent contributions', 30),
+            _buildStatementOption(context, 'Last 6 Months', 'Summary of financial history', 180),
+            _buildStatementOption(context, 'Full History', 'All available transactions', 3650),
             const Spacer(),
             SizedBox(
               width: double.infinity,
@@ -391,12 +412,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Statement generated successfully!'), backgroundColor: Colors.green),
-                  );
+                  final period = _selectedStatementPeriod ?? 'Last 30 Days';
+                  final days = period.contains('6') ? 180 : (period.contains('Full') ? 3650 : 30);
+                  AppSupport.generateStatement(context, periodLabel: period, days: days);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green.shade700,
+                  backgroundColor: const Color(0xFF009639),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                 ),
                 child: const Text('Generate PDF', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
@@ -408,32 +429,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildStatementOption(String title, String subtitle) {
+  Widget _buildStatementOption(BuildContext context, String title, String subtitle, int days) {
+    final isSelected = _selectedStatementPeriod == title;
     return ListTile(
       leading: Container(
         padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: Colors.green.shade50, shape: BoxShape.circle),
-        child: Icon(Icons.picture_as_pdf_outlined, color: Colors.green.shade700, size: 20),
+        decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.08), shape: BoxShape.circle),
+        child: Icon(Icons.picture_as_pdf_outlined, color: AppColors.primary, size: 20),
       ),
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
-      trailing: const Icon(Icons.chevron_right, size: 18),
-      onTap: () {},
+      trailing: isSelected ? const Icon(Icons.check_circle, color: AppColors.primary, size: 20) : const Icon(Icons.chevron_right, size: 18),
+      onTap: () {
+        setState(() => _selectedStatementPeriod = title);
+        Navigator.pop(context);
+        AppSupport.generateStatement(context, periodLabel: title, days: days);
+      },
     );
   }
 
   Widget _buildQuickActionsGrid(BuildContext context) {
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 4,
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
+    return Row(
       children: [
-        _buildActionItem(context, Icons.savings_outlined, 'Savings', const Color(0xFF0F5132), '/contribution_form'),
-        _buildActionItem(context, Icons.account_balance_outlined, 'Loans', const Color(0xFF198754), '/loan_application_form'),
-        _buildActionItem(context, Icons.payments_outlined, 'Pay', const Color(0xFF0D6EFD), '/pay'),
-        _buildActionItem(context, Icons.person_outline, 'Profile', const Color(0xFF6F42C1), '/profile'),
+        Expanded(child: _buildActionItem(context, Icons.savings_outlined, 'Savings', AppColors.primary, '/contribution_form')),
+        Expanded(child: _buildActionItem(context, Icons.account_balance_outlined, 'Loans', AppColors.primaryLight, '/loan_application_form')),
+        Expanded(child: _buildActionItem(context, Icons.payments_outlined, 'Pay', AppColors.success, '/pay')),
+        Expanded(child: _buildActionItem(context, Icons.person_outline, 'Profile', AppColors.primary, '/profile')),
       ],
     );
   }
@@ -459,6 +480,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 8),
           Text(
             label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF1A1A1A)),
           ),
         ],
@@ -501,7 +525,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
         if (type == 'DEPOSIT' || type == 'LOAN_DISBURSEMENT' || type == 'DIVIDEND_PAYOUT') {
           icon = Icons.arrow_downward;
-          color = Colors.green;
+          color = const Color(0xFF009639);
           sign = '+';
         } else {
           icon = Icons.arrow_upward;

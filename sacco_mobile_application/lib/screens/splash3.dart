@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_images.dart';
+import '../services/api_service.dart';
 
 class Splash3 extends StatefulWidget {
   const Splash3({super.key});
@@ -48,7 +49,7 @@ class _Splash3State extends State<Splash3> with SingleTickerProviderStateMixin {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.white, Colors.green.shade50],
+            colors: [Colors.white, const Color(0xFFE8F8EE)],
           ),
         ),
         child: SafeArea(
@@ -71,7 +72,7 @@ class _Splash3State extends State<Splash3> with SingleTickerProviderStateMixin {
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.green.withOpacity(0.08),
+                                color: const Color(0xFF009639).withOpacity(0.08),
                                 blurRadius: 30,
                                 spreadRadius: 5,
                                 offset: const Offset(0, 10),
@@ -99,7 +100,7 @@ class _Splash3State extends State<Splash3> with SingleTickerProviderStateMixin {
                           style: TextStyle(
                             fontSize: 28, 
                             fontWeight: FontWeight.bold,
-                            color: Colors.green.shade900,
+                            color: const Color(0xFF007A2E),
                           ),
                         ),
                         Text(
@@ -108,7 +109,7 @@ class _Splash3State extends State<Splash3> with SingleTickerProviderStateMixin {
                           style: TextStyle(
                             fontSize: 28, 
                             fontWeight: FontWeight.bold,
-                            color: Colors.green.shade600,
+                            color: const Color(0xFF009639),
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -156,14 +157,17 @@ class _Splash3State extends State<Splash3> with SingleTickerProviderStateMixin {
                               width: 180,
                               height: 55,
                               child: ElevatedButton(
-                                onPressed: () {
-                                  Navigator.pushReplacementNamed(context, '/welcome');
+                                onPressed: () async {
+                                  await ApiService.setOnboardingCompleted();
+                                  if (context.mounted) {
+                                    Navigator.pushReplacementNamed(context, '/welcome');
+                                  }
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green.shade700,
+                                  backgroundColor: const Color(0xFF009639),
                                   foregroundColor: Colors.white,
                                   elevation: 5,
-                                  shadowColor: Colors.green.withOpacity(0.5),
+                                  shadowColor: const Color(0xFF009639).withOpacity(0.5),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(15),
                                   ),
@@ -206,7 +210,7 @@ class _Splash3State extends State<Splash3> with SingleTickerProviderStateMixin {
       height: 8,
       width: isActive ? 24 : 8,
       decoration: BoxDecoration(
-        color: isActive ? Colors.green.shade600 : Colors.green.shade200,
+        color: isActive ? const Color(0xFF009639) : const Color(0xFFB8E6C8),
         borderRadius: BorderRadius.circular(4),
       ),
     );

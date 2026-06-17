@@ -191,18 +191,18 @@ class _LoginScreenState extends State<LoginScreen> {
               decoration: BoxDecoration(
                 color: const Color(0xFFF0F7F4),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF0F5132).withOpacity(0.2)),
+                border: Border.all(color: const Color(0xFF009639).withOpacity(0.2)),
               ),
               child: Row(
                 children: [
                   const Icon(Icons.settings_ethernet_rounded,
-                      color: Color(0xFF0F5132), size: 18),
+                      color: Color(0xFF009639), size: 18),
                   const SizedBox(width: 8),
                   const Expanded(
                     child: Text(
                       'Connection Settings',
                       style: TextStyle(
-                        color: Color(0xFF0F5132),
+                        color: Color(0xFF009639),
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
                       ),
@@ -212,7 +212,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     _showConnectionSettings
                         ? Icons.keyboard_arrow_up_rounded
                         : Icons.keyboard_arrow_down_rounded,
-                    color: const Color(0xFF0F5132),
+                    color: const Color(0xFF009639),
                   ),
                 ],
               ),
@@ -243,7 +243,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     children: [
                       const Icon(Icons.link_rounded,
-                          color: Color(0xFF198754), size: 16),
+                          color: Color(0xFF00B84A), size: 16),
                       const SizedBox(width: 6),
                       const Text('Active URL:',
                           style: TextStyle(
@@ -256,7 +256,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ApiService.baseUrl,
                           style: const TextStyle(
                               fontSize: 11,
-                              color: Color(0xFF0F5132),
+                              color: Color(0xFF009639),
                               fontFamily: 'monospace'),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -288,7 +288,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     decoration: InputDecoration(
                       hintText: 'http://192.168.x.x:8000/api',
                       prefixIcon: const Icon(Icons.dns_rounded,
-                          color: Color(0xFF0F5132), size: 18),
+                          color: Color(0xFF009639), size: 18),
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 12),
                       isDense: true,
@@ -308,7 +308,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: _connectionOk
-                              ? const Color(0xFF0F5132).withOpacity(0.3)
+                              ? const Color(0xFF009639).withOpacity(0.3)
                               : Colors.red.shade200,
                         ),
                       ),
@@ -317,7 +317,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: TextStyle(
                           fontSize: 12,
                           color: _connectionOk
-                              ? const Color(0xFF0F5132)
+                              ? const Color(0xFF009639)
                               : Colors.red.shade700,
                           fontWeight: FontWeight.w600,
                         ),
@@ -370,7 +370,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               _isTestingConnection ? 'Testing…' : 'Apply & Test',
                               style: const TextStyle(fontSize: 12)),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF0F5132),
+                            backgroundColor: const Color(0xFF009639),
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 10),
                           ),
@@ -438,7 +438,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(result['message'] ?? 'Login successful'),
-              backgroundColor: const Color(0xFF0F5132),
+              backgroundColor: const Color(0xFF009639),
             ),
           );
           Navigator.pushReplacementNamed(context, '/dashboard');
@@ -500,7 +500,7 @@ class _LoginScreenState extends State<LoginScreen> {
         _strengthColor = Colors.orange;
       } else {
         _passwordStrength = 'Strong Password';
-        _strengthColor = Colors.green;
+        _strengthColor = const Color(0xFF009639);
       }
     });
   }
@@ -530,7 +530,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: [Color(0xFF0F5132), Color(0xFF198754)],
+                            colors: [Color(0xFF009639), Color(0xFF00B84A)],
                           ),
                           borderRadius: BorderRadius.only(
                             bottomLeft: Radius.circular(40),
@@ -712,36 +712,37 @@ class _LoginScreenState extends State<LoginScreen> {
                                         ),
                                       ],
                                     ),
-                                  ],
-                                  
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          SizedBox(
-                                            width: 24,
-                                            height: 24,
-                                            child: Checkbox(
-                                              value: _rememberMe,
-                                              activeColor: const Color(0xFF0F5132),
-                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                                              onChanged: (val) => setState(() => _rememberMe = val ?? false),
-                                            ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: Row(
+                                            children: [
+                                              SizedBox(
+                                                width: 24,
+                                                height: 24,
+                                                child: Checkbox(
+                                                  value: _rememberMe,
+                                                  activeColor: const Color(0xFF009639),
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                                                  onChanged: (val) => setState(() => _rememberMe = val ?? false),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              const Text('Remember Me', style: TextStyle(fontSize: 13, color: Colors.black54, fontWeight: FontWeight.w500)),
+                                            ],
                                           ),
-                                          const SizedBox(width: 8),
-                                          const Text('Remember Me', style: TextStyle(fontSize: 13, color: Colors.black54, fontWeight: FontWeight.w500)),
-                                        ],
-                                      ),
-                                      TextButton(
-                                        onPressed: () => Navigator.pushNamed(context, '/forgot_password'),
-                                        child: Text(
-                                          'Forgot Password?',
-                                          style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold, fontSize: 13),
                                         ),
-                                      ),
-                                    ],
-                                  ),
+                                        TextButton(
+                                          onPressed: () => Navigator.pushNamed(context, '/forgot_password'),
+                                          child: const Text(
+                                            'Forgot Password?',
+                                            style: TextStyle(color: Color(0xFF009639), fontWeight: FontWeight.bold, fontSize: 13),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                   
                                   const SizedBox(height: 10),
                                   
@@ -749,7 +750,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      const Icon(Icons.verified_user, color: Colors.green, size: 16),
+                                      const Icon(Icons.verified_user, color: const Color(0xFF009639), size: 16),
                                       const SizedBox(width: 6),
                                       Text(
                                         'SECURE 256-BIT SSL ENCRYPTION',
@@ -802,7 +803,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     child: const Text(
                                       'Sign Up',
                                       style: TextStyle(
-                                        color: Color(0xFF0F5132),
+                                        color: Color(0xFF009639),
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),

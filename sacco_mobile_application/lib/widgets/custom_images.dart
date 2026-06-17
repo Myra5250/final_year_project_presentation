@@ -9,13 +9,13 @@ class LogoPainter extends CustomPainter {
 
     // Outer Glow/Ring
     final paintRing = Paint()
-      ..color = Colors.green.shade200.withOpacity(0.3)
+      ..color = const Color(0xFFB8E6C8).withOpacity(0.3)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 10;
     canvas.drawCircle(center, radius * 0.9, paintRing);
 
     final paintInnerRing = Paint()
-      ..color = Colors.green.shade300.withOpacity(0.5)
+      ..color = const Color(0xFF8FD4A8).withOpacity(0.5)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 5;
     canvas.drawCircle(center, radius * 0.8, paintInnerRing);
@@ -36,7 +36,7 @@ class LogoPainter extends CustomPainter {
 
     final paintShield = Paint()
       ..shader = LinearGradient(
-        colors: [Colors.green.shade400, Colors.green.shade800],
+        colors: [const Color(0xFF00B84A), const Color(0xFF007A2E)],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ).createShader(Rect.fromCircle(center: center, radius: radius))
@@ -103,11 +103,11 @@ class CommunityPainter extends CustomPainter {
     }
     
     // Center Person
-    drawPerson(Offset(center.dx, center.dy + 20), Colors.green.shade700, 1.2);
+    drawPerson(Offset(center.dx, center.dy + 20), const Color(0xFF009639), 1.2);
     // Left Person
-    drawPerson(Offset(center.dx - 60, center.dy + 40), Colors.green.shade500, 0.9);
+    drawPerson(Offset(center.dx - 60, center.dy + 40), const Color(0xFF00B84A), 0.9);
     // Right Person
-    drawPerson(Offset(center.dx + 60, center.dy + 40), Colors.green.shade500, 0.9);
+    drawPerson(Offset(center.dx + 60, center.dy + 40), const Color(0xFF00B84A), 0.9);
     
     // Connection arcs
     final paintLine = Paint()
@@ -153,7 +153,7 @@ class GrowthPainter extends CustomPainter {
     pathGraph.cubicTo(w * 0.6, h * 0.4, w * 0.8, h * 0.5, w, h * 0.2);
     
     final paintGraph = Paint()
-      ..color = Colors.green.shade600
+      ..color = const Color(0xFF009639)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4
       ..strokeCap = StrokeCap.round;
@@ -170,7 +170,7 @@ class GrowthPainter extends CustomPainter {
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [Colors.green.shade200.withOpacity(0.5), Colors.green.shade50.withOpacity(0.1)],
+        colors: [const Color(0xFFB8E6C8).withOpacity(0.5), const Color(0xFFE8F8EE).withOpacity(0.1)],
       ).createShader(Rect.fromLTWH(0, 0, w, h));
       
     canvas.drawPath(pathArea, paintArea);

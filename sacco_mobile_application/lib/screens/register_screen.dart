@@ -131,7 +131,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result['message']),
-            backgroundColor: const Color(0xFF0F5132),
+            backgroundColor: const Color(0xFF009639),
           ),
         );
         Navigator.pushReplacementNamed(context, '/registration_success');
@@ -171,7 +171,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           gradient: const LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: [Color(0xFF0F5132), Color(0xFF198754)],
+                            colors: [Color(0xFF009639), Color(0xFF00B84A)],
                           ),
                           borderRadius: const BorderRadius.only(
                             bottomLeft: Radius.circular(40),
@@ -324,10 +324,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       child: ElevatedButton(
                                         onPressed: _isLoading || !_allowRegistration ? null : _handleRegister,
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: const Color(0xFF0F5132),
+                                          backgroundColor: const Color(0xFF009639),
                                           foregroundColor: Colors.white,
                                           elevation: 5,
-                                          shadowColor: const Color(0xFF0F5132).withOpacity(0.4),
+                                          shadowColor: const Color(0xFF009639).withOpacity(0.4),
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(16),
                                           ),
@@ -364,7 +364,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                           child: Text(
                                             'Login',
                                             style: TextStyle(
-                                              color: Colors.green.shade700,
+                                              color: const Color(0xFF009639),
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
@@ -422,7 +422,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           decoration: InputDecoration(
             counterText: "",
             hintText: 'Enter your $label',
-            prefixIcon: Icon(icon, color: const Color(0xFF198754)),
+            prefixIcon: Icon(icon, color: const Color(0xFF00B84A)),
             suffixIcon: isPassword
                 ? IconButton(
                     icon: Icon(_obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined),
@@ -440,7 +440,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             focusedBorder: const OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
-              borderSide: BorderSide(color: Color(0xFF0F5132), width: 2),
+              borderSide: BorderSide(color: Color(0xFF009639), width: 2),
             ),
             filled: true,
             fillColor: enabled ? Colors.grey.shade50 : Colors.grey.shade100,

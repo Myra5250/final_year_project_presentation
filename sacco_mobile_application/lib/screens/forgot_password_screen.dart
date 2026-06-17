@@ -37,7 +37,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('If that email exists, a reset code was sent. Check the server console.'),
-          backgroundColor: Color(0xFF0F5132),
+          backgroundColor: Color(0xFF009639),
           duration: Duration(seconds: 4),
         ),
       );
@@ -75,14 +75,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   height: 90,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF0F5132), Color(0xFF198754)],
+                      colors: [Color(0xFF009639), Color(0xFF00B84A)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(28),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF0F5132).withOpacity(0.3),
+                        color: const Color(0xFF009639).withOpacity(0.3),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
@@ -95,7 +95,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
               const Text(
                 'Forgot Password?',
-                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xFF0F5132)),
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xFF009639)),
               ),
               const SizedBox(height: 10),
               const Text(
@@ -142,10 +142,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _requestReset,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0F5132),
+                          backgroundColor: const Color(0xFF009639),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                           elevation: 4,
-                          shadowColor: const Color(0xFF0F5132).withOpacity(0.3),
+                          shadowColor: const Color(0xFF009639).withOpacity(0.3),
                         ),
                         child: _isLoading
                             ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
@@ -162,7 +162,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   onPressed: () => Navigator.pop(context),
                   icon: const Icon(Icons.arrow_back_rounded, size: 16),
                   label: const Text('Back to Login'),
-                  style: TextButton.styleFrom(foregroundColor: const Color(0xFF0F5132)),
+                  style: TextButton.styleFrom(foregroundColor: const Color(0xFF009639)),
                 ),
               ),
             ],

@@ -46,11 +46,11 @@ class _RegistrationSuccessScreenState extends State<RegistrationSuccessScreen> w
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.green.shade50,
+                    color: const Color(0xFFE8F8EE),
                   ),
                   child: Icon(
                     Icons.check_circle_rounded,
-                    color: Colors.green.shade600,
+                    color: const Color(0xFF009639),
                     size: 100,
                   ),
                 ),
@@ -88,10 +88,10 @@ class _RegistrationSuccessScreenState extends State<RegistrationSuccessScreen> w
                     Navigator.pushReplacementNamed(context, '/login');
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green.shade700,
+                    backgroundColor: const Color(0xFF009639),
                     foregroundColor: Colors.white,
                     elevation: 5,
-                    shadowColor: Colors.green.withOpacity(0.4),
+                    shadowColor: const Color(0xFF009639).withOpacity(0.4),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),

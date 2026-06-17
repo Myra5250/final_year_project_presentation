@@ -1,23 +1,23 @@
 :root {
-    /* Light Mode Variables */
-    --primary: #3b82f6;
-    --primary-light: #eff6ff;
-    --primary-hover: #2563eb;
+    /* Light Mode — Nutriblend green (#009639) */
+    --primary: #009639;
+    --primary-light: #00B84A;
+    --primary-hover: #007A2E;
     --secondary: #64748b;
-    --background: #f1f5f9;
+    --background: #f5f9f6;
     --sidebar: #ffffff;
     --sidebar-text: #64748b;
-    --sidebar-hover-bg: #f8fafc;
-    --sidebar-active-bg: #eff6ff;
-    --sidebar-active-text: #2563eb;
+    --sidebar-hover-bg: #e8f8ee;
+    --sidebar-active-bg: #e8f8ee;
+    --sidebar-active-text: #009639;
     --sidebar-border: #e2e8f0;
     --card-bg: #ffffff;
-    --text-main: #0f172a;
+    --text-main: #1a1a1a;
     --text-muted: #64748b;
-    --success: #10b981;
+    --success: #009639;
     --danger: #ef4444;
     --warning: #f59e0b;
-    --info: #06b6d4;
+    --info: #0284c7;
     
     /* Layout & Shadow constants */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -30,10 +30,10 @@
 }
 
 body.dark-mode {
-    /* Dark Mode Variables */
-    --primary: #6366f1;
-    --primary-light: #1e1b4b;
-    --primary-hover: #4f46e5;
+    /* Dark Mode */
+    --primary: #00B84A;
+    --primary-light: #009639;
+    --primary-hover: #007A2E;
     --secondary: #94a3b8;
     --background: #090d16;
     --sidebar: #0f172a;
@@ -322,7 +322,7 @@ header {
     font-weight: 800;
     color: white;
     font-size: 0.95rem;
-    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 4px 10px rgba(25, 135, 84, 0.2);
 }
 
 /* Stats Grid */
@@ -510,9 +510,9 @@ tr:hover td {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--primary), #6366f1);
+    background: linear-gradient(135deg, var(--primary), #10b981);
     color: white;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 4px 12px rgba(25, 135, 84, 0.2);
 }
 
 .btn-primary:hover {
@@ -680,7 +680,7 @@ body.dark-mode .form-group input:focus {
 
 /* Welcome Banner Card */
 .welcome-banner {
-    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
     color: white;
     padding: 2.5rem 3rem;
     border-radius: var(--radius-lg);
@@ -1610,4 +1610,50 @@ body.dark-mode .welcome-banner {
     .settings-toggle-row { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
     .toast-container { left: 1rem; right: 1rem; bottom: 1rem; }
     .toast { min-width: unset; max-width: 100%; }
+}
+
+/* =============================================
+   SUPER ADMIN & ROLE BADGES
+   ============================================= */
+.super-admin-banner {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 45%, #4c1d95 100%);
+}
+
+.super-admin-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.role-badge-super {
+    background: rgba(251, 191, 36, 0.18) !important;
+    border-color: rgba(251, 191, 36, 0.35) !important;
+    color: #fde68a !important;
+}
+
+.role-badge-admin {
+    background: rgba(16, 185, 129, 0.15) !important;
+    border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+.role-badge-teller {
+    background: rgba(99, 102, 241, 0.15) !important;
+    border-color: rgba(99, 102, 241, 0.3) !important;
+}
+
+.btn-warning {
+    background: #f59e0b;
+    color: white;
+    border: none;
+}
+
+.btn-warning:hover {
+    background: #d97706;
+}
+
+@media (max-width: 1024px) {
+    .super-admin-grid {
+        grid-template-columns: 1fr;
+    }
 }

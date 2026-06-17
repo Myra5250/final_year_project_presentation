@@ -1,4 +1,45 @@
-const API_BASE = "http://127.0.0.1:8000/api";
+/**
+ * Resolve API base URL.
+ * - When admin is served by Flask at /admin/ (port 8000 or Render), use same origin.
+ * - When opened via Live Server / another port locally, use localhost:8000.
+ * - Override anytime: localStorage.setItem('sacco_api_base', 'http://127.0.0.1:8000/api')
+ */
+function resolveApiBase() {
+    const saved = localStorage.getItem('sacco_api_base');
+    if (saved) {
+        return saved.replace(/\/$/, '');
+    }
+
+    const { protocol, hostname, port, origin } = window.location;
+
+    if (protocol === 'file:') {
+        return 'http://127.0.0.1:8000/api';
+    }
+
+    const isLocal = hostname === '127.0.0.1' || hostname === 'localhost';
+    if (isLocal) {
+        if (port === '8000' || port === '') {
+            return `${origin}/api`;
+        }
+        return 'http://127.0.0.1:8000/api';
+    }
+
+    if (hostname.includes('onrender.com')) {
+        return `${origin}/api`;
+    }
+
+    return `${origin}/api`;
+}
+
+const API_BASE = resolveApiBase();
+
+function formatFetchError(err) {
+    if (err && err.message === 'Failed to fetch') {
+        return `Cannot reach the API at ${API_BASE}. Start the backend (python run.py) or open the admin at http://127.0.0.1:8000/admin/`;
+    }
+    return err?.message || 'An unexpected error occurred.';
+}
+
 
 // ============================================================
 // TOAST NOTIFICATION SYSTEM
@@ -64,6 +105,31 @@ const app = {
     user: JSON.parse(localStorage.getItem('sacco_user') || 'null'),
     refreshInterval: null,
 
+    ROLES: {
+        SUPER_ADMIN: 'SUPER_ADMIN',
+        ADMIN: 'ADMIN',
+        TELLER: 'TELLER'
+    },
+
+    isSuperAdmin() { return this.user?.role === this.ROLES.SUPER_ADMIN; },
+    isAdmin() { return this.user?.role === this.ROLES.ADMIN; },
+    isTeller() { return this.user?.role === this.ROLES.TELLER; },
+
+    getRoleLabel(role) {
+        const map = {
+            SUPER_ADMIN: 'Super Admin',
+            ADMIN: 'Administrator',
+            TELLER: 'Teller'
+        };
+        return map[role] || 'Administrator';
+    },
+
+    getRoleBadgeClass(role) {
+        if (role === 'SUPER_ADMIN') return 'role-badge-super';
+        if (role === 'TELLER') return 'role-badge-teller';
+        return 'role-badge-admin';
+    },
+
     // ─── INIT ──────────────────────────────────────────────────
     init() {
         toast.init();
@@ -72,12 +138,54 @@ const app = {
         this.setupModalListeners();
         this.setupSearchListener();
         this.setupPasswordToggles();
+        this.checkBootstrapStatus();
         if (this.token && this.user && this.user.is_admin) {
             this.showMain();
         } else {
             this.showLogin();
         }
         this.checkLockout();
+    },
+
+    async checkBootstrapStatus() {
+        try {
+            const res = await fetch(`${API_BASE}/admin/setup-status`);
+            const data = await res.json();
+            const link = document.getElementById('bootstrap-register-link');
+            if (link && data.bootstrap_allowed) link.classList.remove('hidden');
+        } catch { /* backend offline */ }
+    },
+
+    applyRoleUI() {
+        const role = this.user?.role || this.ROLES.ADMIN;
+        const roleLabel = this.getRoleLabel(role);
+        const roleEl = document.getElementById('admin-role-label');
+        const welcomeBadge = document.getElementById('welcome-role-badge');
+        if (roleEl) roleEl.textContent = roleLabel;
+        if (welcomeBadge) {
+            welcomeBadge.className = `welcome-role-badge ${this.getRoleBadgeClass(role)}`;
+            const icon = role === 'SUPER_ADMIN' ? 'fa-crown' : role === 'TELLER' ? 'fa-cash-register' : 'fa-shield-halved';
+            welcomeBadge.innerHTML = `<i class="fa-solid ${icon}"></i> ${roleLabel.toUpperCase()}`;
+        }
+
+        document.querySelectorAll('.super-admin-only').forEach(el => {
+            el.classList.toggle('hidden', !this.isSuperAdmin());
+        });
+        document.querySelectorAll('.non-super-admin-only').forEach(el => {
+            el.classList.toggle('hidden', this.isSuperAdmin());
+        });
+        document.querySelectorAll('.admin-only-nav').forEach(el => {
+            el.classList.toggle('hidden', this.isTeller());
+        });
+        document.getElementById('op-apply-loan')?.classList.toggle('hidden', this.isTeller());
+        document.querySelectorAll('.super-admin-tab').forEach(el => {
+            el.classList.toggle('hidden', !this.isSuperAdmin());
+        });
+
+        const sidebarBrand = document.querySelector('.sidebar-header span:last-child');
+        if (sidebarBrand && this.isSuperAdmin()) {
+            sidebarBrand.textContent = 'SUPER ADMIN';
+        }
     },
 
     checkLockout() {
@@ -202,6 +310,7 @@ const app = {
     },
 
     switchSettingsTab(tabId) {
+        if (!this.isSuperAdmin() && tabId !== 'profile') tabId = 'profile';
         document.querySelectorAll('.settings-tab-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-tab') === tabId));
         document.querySelectorAll('.settings-tab-content').forEach(c => c.classList.add('hidden'));
         document.getElementById(`settings-tab-${tabId}`)?.classList.remove('hidden');
@@ -242,8 +351,25 @@ const app = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
             });
-            const data = await res.json();
+            let data = await res.json();
             if (res.ok) {
+                if (data.requires_mfa) {
+                    const code = prompt(`MFA code sent to ${data.email}. Please enter the 6-digit verification code:`);
+                    if (!code) {
+                        throw new Error("MFA verification cancelled.");
+                    }
+                    const verifyRes = await fetch(`${API_BASE}/login/verify`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: data.email, code })
+                    });
+                    const verifyData = await verifyRes.json();
+                    if (!verifyRes.ok) {
+                        throw new Error(verifyData.message || "MFA verification failed.");
+                    }
+                    data = verifyData;
+                }
+
                 if (!data.user.is_admin) {
                     loginSecurity.recordFailure();
                     throw new Error("Access Denied: Administrative credentials required.");
@@ -267,7 +393,7 @@ const app = {
                 }
             }
         } catch (err) {
-            if (errEl) { errEl.textContent = err.message; errEl.classList.remove('hidden'); }
+            if (errEl) { errEl.textContent = formatFetchError(err); errEl.classList.remove('hidden'); }
             if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-lock"></i> Secure Login'; }
         }
     },
@@ -283,13 +409,13 @@ const app = {
             });
             const result = await res.json();
             if (res.ok) {
-                toast.success("Administrative account created! You may now sign in.");
+                toast.success("Super Admin account created! You may now sign in.");
                 document.getElementById('show-login')?.click();
             } else {
                 throw new Error(result.error || "Registration failed.");
             }
         } catch (err) {
-            if (errEl) { errEl.textContent = err.message; errEl.classList.remove('hidden'); }
+            if (errEl) { errEl.textContent = formatFetchError(err); errEl.classList.remove('hidden'); }
         }
     },
 
@@ -316,31 +442,54 @@ const app = {
             document.getElementById('admin-name').textContent = this.user.username;
             document.getElementById('admin-avatar').textContent = name.charAt(0).toUpperCase();
         }
-        this.navigate('dashboard');
-        // Auto-refresh stats every 60 seconds
+        this.applyRoleUI();
+        this.navigate(this.isSuperAdmin() ? 'super-admin' : 'dashboard');
         this.refreshInterval = setInterval(() => {
-            if (document.querySelector('.nav-link.active')?.getAttribute('data-page') === 'dashboard') this.refreshStats();
+            const page = document.querySelector('.nav-link.active')?.getAttribute('data-page');
+            if (page === 'dashboard') this.refreshStats();
+            if (page === 'super-admin') this.loadSuperAdminPage();
         }, 60000);
     },
 
     // ─── NAVIGATION ────────────────────────────────────────────
     navigate(pageId) {
+        if (pageId === 'loans' && this.isTeller()) { toast.warning('Tellers cannot access loan management.'); return; }
+        if (pageId === 'transactions' && this.isTeller()) { toast.warning('Tellers cannot access financial audit.'); return; }
+        if (pageId === 'settings' && !this.isSuperAdmin()) {
+            this.switchSettingsTab('profile');
+        }
+        if (pageId === 'super-admin' && !this.isSuperAdmin()) {
+            toast.error('Super Admin access required.');
+            return;
+        }
+
         document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
         document.querySelector(`.nav-link[data-page="${pageId}"]`)?.classList.add('active');
         document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
         document.getElementById(`page-${pageId}`)?.classList.remove('hidden');
-        const titles = { dashboard: 'Executive Overview', users: 'Member Management Console', loans: 'Loan Application Pipeline', transactions: 'Global Financial Audit', settings: 'System Configuration' };
+        const titles = {
+            'super-admin': 'Super Admin Control Center',
+            dashboard: 'Executive Overview',
+            users: 'Member Management Console',
+            loans: 'Loan Application Pipeline',
+            transactions: 'Global Financial Audit',
+            settings: 'System Configuration'
+        };
         document.getElementById('page-heading').textContent = titles[pageId] || pageId;
         this.fetchPageData(pageId);
     },
 
     async fetchPageData(pageId) {
         switch (pageId) {
+            case 'super-admin': await this.loadSuperAdminPage(); break;
             case 'dashboard': await this.refreshStats(); await this.loadRecentLoans(); break;
             case 'users': await this.loadUsers(); break;
             case 'loans': await this.loadLoans(); break;
             case 'transactions': await this.loadTransactions(); break;
-            case 'settings': await this.loadConfig(); break;
+            case 'settings':
+                if (this.isSuperAdmin()) await this.loadConfig();
+                else this.switchSettingsTab('profile');
+                break;
         }
     },
 
@@ -371,6 +520,17 @@ const app = {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
                 body: JSON.stringify(body)
+            });
+            if (res.status === 401 || res.status === 403) { toast.error("Session expired."); setTimeout(() => this.logout(), 1500); return null; }
+            return res;
+        } catch { toast.error("Network error."); return null; }
+    },
+
+    async apiDelete(endpoint) {
+        try {
+            const res = await fetch(`${API_BASE}${endpoint}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${this.token}` }
             });
             if (res.status === 401 || res.status === 403) { toast.error("Session expired."); setTimeout(() => this.logout(), 1500); return null; }
             return res;
@@ -519,11 +679,11 @@ const app = {
                 <td>${loan.duration_months} Months</td>
                 <td><span class="badge badge-${loan.status.toLowerCase()}">${loan.status}</span></td>
                 <td>
-                    ${loan.status === 'PENDING' ? `
+                    ${loan.status === 'PENDING' && !this.isTeller() ? `
                         <div style="display:flex;gap:0.4rem;">
                             <button class="btn btn-primary btn-sm" onclick="app.loanAction(${loan.id},'APPROVED')"><i class="fa-solid fa-check"></i> Approve</button>
                             <button class="btn btn-danger btn-sm" onclick="app.loanAction(${loan.id},'REJECTED')"><i class="fa-solid fa-xmark"></i> Reject</button>
-                        </div>` : '<span style="color:var(--text-muted);font-style:italic;">Processed</span>'}
+                        </div>` : loan.status === 'PENDING' ? '<span style="color:var(--text-muted);">Awaiting review</span>' : '<span style="color:var(--text-muted);font-style:italic;">Processed</span>'}
                 </td>
             </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:2rem;">No loan applications found.</td></tr>';
     },
@@ -670,13 +830,191 @@ const app = {
         } catch (err) { toast.error(err.message); }
     },
 
+    // ─── SUPER ADMIN ───────────────────────────────────────────
+    async loadSuperAdminPage() {
+        if (!this.isSuperAdmin()) return;
+        const name = this.user?.full_name || this.user?.username || 'Super Admin';
+        const saName = document.getElementById('sa-welcome-name');
+        const saAvatar = document.getElementById('sa-welcome-avatar');
+        if (saName) saName.textContent = name;
+        if (saAvatar) saAvatar.textContent = name.charAt(0).toUpperCase();
+
+        const stats = await this.apiFetch('/admin/stats');
+        const admins = await this.apiFetch('/admin/admins');
+        const audit = await this.apiFetch('/admin/audit-log');
+        const s = id => document.getElementById(id);
+        if (stats) {
+            if (s('sa-stat-users')) s('sa-stat-users').textContent = stats.total_users;
+            if (s('sa-stat-loans')) s('sa-stat-loans').textContent = stats.pending_loans;
+        }
+        if (admins) {
+            if (s('sa-stat-admins')) s('sa-stat-admins').textContent = admins.length;
+        }
+        if (audit) {
+            if (s('sa-stat-audit')) s('sa-stat-audit').textContent = audit.length;
+        }
+        await this.loadSuperAdminAdmins();
+        await this.loadSuperAdminMembers();
+        await this.loadAuditLog();
+    },
+
+    roleBadgeHtml(role) {
+        const cls = role === 'SUPER_ADMIN' ? 'badge-info' : role === 'TELLER' ? 'badge-secondary' : 'badge-success';
+        const label = this.getRoleLabel(role);
+        return `<span class="badge ${cls}">${label}</span>`;
+    },
+
+    async loadSuperAdminAdmins() {
+        const admins = await this.apiFetch('/admin/admins');
+        if (!admins) return;
+        const tbody = document.querySelector('#sa-admins-table tbody');
+        if (!tbody) return;
+        tbody.innerHTML = admins.map(a => {
+            const isSelf = a.id === this.user?.id;
+            const isSuper = a.role === 'SUPER_ADMIN';
+            const active = a.is_active !== 0 && a.is_active !== false;
+            return `
+            <tr>
+                <td><span style="font-family:monospace;font-weight:600;">#ADM-${String(a.id).padStart(3,'0')}</span></td>
+                <td><strong>${a.full_name}</strong><div style="font-size:0.72rem;color:var(--text-muted);">@${a.username}</div></td>
+                <td>${a.email}</td>
+                <td>${this.roleBadgeHtml(a.role)}</td>
+                <td><span class="badge ${active ? 'badge-success' : 'badge-danger'}">${active ? 'ACTIVE' : 'INACTIVE'}</span></td>
+                <td>
+                    <div style="display:flex;gap:0.35rem;flex-wrap:wrap;">
+                        ${!isSuper ? `
+                            <button class="btn btn-primary btn-sm" onclick="app.editAdmin(${a.id}, '${a.role}', ${active ? 1 : 0})"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn btn-warning btn-sm" onclick="app.toggleAdminActive(${a.id}, ${active ? 0 : 1})">${active ? 'Deactivate' : 'Activate'}</button>
+                            <button class="btn btn-danger btn-sm" onclick="app.deleteAdmin(${a.id}, '${a.full_name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-trash"></i></button>
+                        ` : '<span style="color:var(--text-muted);font-size:0.8rem;">Protected</span>'}
+                        ${isSelf ? '<span style="font-size:0.72rem;color:var(--primary);">You</span>' : ''}
+                    </div>
+                </td>
+            </tr>`;
+        }).join('') || '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted);">No admins found.</td></tr>';
+
+        this.loadAdmins();
+    },
+
+    async createAdmin(e) {
+        e.preventDefault();
+        const phone = document.getElementById('sa-admin-phone')?.value;
+        if (!/^\d{10}$/.test(phone)) { toast.error('Phone must be exactly 10 digits.'); return; }
+        const body = {
+            full_name: document.getElementById('sa-admin-fullname')?.value,
+            username: document.getElementById('sa-admin-username')?.value,
+            email: document.getElementById('sa-admin-email')?.value,
+            phone_number: phone,
+            password: document.getElementById('sa-admin-password')?.value,
+            role: document.getElementById('sa-admin-role')?.value
+        };
+        const res = await this.apiPost('/admin/admins', body);
+        if (!res) return;
+        const data = await res.json();
+        if (res.ok) {
+            toast.success('Admin account created successfully!');
+            document.getElementById('sa-create-admin-form')?.reset();
+            await this.loadSuperAdminPage();
+        } else {
+            toast.error(data.error || 'Failed to create admin.');
+        }
+    },
+
+    async editAdmin(id, currentRole, isActive) {
+        const role = prompt('Set role (ADMIN or TELLER):', currentRole === 'SUPER_ADMIN' ? 'ADMIN' : currentRole);
+        if (!role) return;
+        const normalized = role.toUpperCase();
+        if (!['ADMIN', 'TELLER'].includes(normalized)) { toast.error('Role must be ADMIN or TELLER.'); return; }
+        const res = await this.apiPut(`/admin/admins/${id}`, { role: normalized, is_active: !!isActive });
+        if (!res) return;
+        const data = await res.json();
+        if (res.ok) { toast.success('Admin updated.'); await this.loadSuperAdminAdmins(); }
+        else toast.error(data.error || 'Update failed.');
+    },
+
+    async toggleAdminActive(id, activate) {
+        const action = activate ? 'activate' : 'deactivate';
+        if (!confirm(`Are you sure you want to ${action} this admin?`)) return;
+        const res = await this.apiPut(`/admin/admins/${id}`, { is_active: !!activate });
+        if (!res) return;
+        const data = await res.json();
+        if (res.ok) { toast.success(`Admin ${action}d.`); await this.loadSuperAdminAdmins(); }
+        else toast.error(data.error || 'Action failed.');
+    },
+
+    async deleteAdmin(id, name) {
+        if (!confirm(`Delete admin "${name}"? This cannot be undone.`)) return;
+        const res = await this.apiDelete(`/admin/admins/${id}`);
+        if (!res) return;
+        const data = await res.json();
+        if (res.ok) { toast.success('Admin deleted.'); await this.loadSuperAdminPage(); }
+        else toast.error(data.error || 'Delete failed.');
+    },
+
+    async loadSuperAdminMembers() {
+        const users = await this.apiFetch('/admin/users');
+        if (!users) return;
+        const tbody = document.querySelector('#sa-members-table tbody');
+        if (!tbody) return;
+        tbody.innerHTML = users.map(u => `
+            <tr>
+                <td>#${u.id}</td>
+                <td><strong>${u.full_name}</strong><div style="font-size:0.72rem;color:var(--text-muted);">@${u.username}</div></td>
+                <td>${u.email}</td>
+                <td style="font-weight:600;">${this.formatCurrency(u.balance)}</td>
+                <td>
+                    <button class="btn btn-primary btn-sm" onclick="app.editMember(${u.id})"><i class="fa-solid fa-pen"></i> Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="app.deleteMember(${u.id}, '${u.full_name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted);">No members found.</td></tr>';
+    },
+
+    async editMember(id) {
+        const full_name = prompt('Full name:');
+        if (full_name === null) return;
+        const email = prompt('Email:');
+        if (email === null) return;
+        const res = await this.apiPut(`/admin/users/${id}`, { full_name, email });
+        if (!res) return;
+        const data = await res.json();
+        if (res.ok) { toast.success('Member updated.'); await this.loadSuperAdminMembers(); }
+        else toast.error(data.error || 'Update failed.');
+    },
+
+    async deleteMember(id, name) {
+        if (!confirm(`Delete member "${name}" and all their data? This cannot be undone.`)) return;
+        const res = await this.apiDelete(`/admin/users/${id}`);
+        if (!res) return;
+        const data = await res.json();
+        if (res.ok) { toast.success('Member deleted.'); await this.loadSuperAdminPage(); }
+        else toast.error(data.error || 'Delete failed.');
+    },
+
+    async loadAuditLog() {
+        const logs = await this.apiFetch('/admin/audit-log');
+        if (!logs) return;
+        const tbody = document.querySelector('#sa-audit-table tbody');
+        if (!tbody) return;
+        tbody.innerHTML = logs.map(l => `
+            <tr>
+                <td style="font-size:0.8rem;color:var(--text-muted);">${new Date(l.created_at).toLocaleString()}</td>
+                <td><strong>${l.full_name || l.username}</strong><div style="font-size:0.72rem;">${this.getRoleLabel(l.role)}</div></td>
+                <td><code style="font-size:0.75rem;">${l.action}</code></td>
+                <td>${l.target_type || '—'} ${l.target_id ? `#${l.target_id}` : ''}</td>
+                <td style="font-size:0.78rem;color:var(--text-muted);max-width:220px;">${l.details || '—'}</td>
+            </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted);">No audit events yet.</td></tr>';
+    },
+
     // ─── SETTINGS: ADMIN USERS ─────────────────────────────────
     async loadAdmins() {
+        if (!this.isSuperAdmin()) return;
         const admins = await this.apiFetch('/admin/admins');
         if (!admins) return;
         const tbody = document.querySelector('#admins-table tbody');
         if (!tbody) return;
-        tbody.innerHTML = admins.map(a => `
+        tbody.innerHTML = admins.map(a => {
+            const active = a.is_active !== 0 && a.is_active !== false;
+            return `
             <tr>
                 <td><span style="font-family:monospace;font-weight:600;color:var(--primary);">#ADM-${a.id.toString().padStart(3,'0')}</span></td>
                 <td>
@@ -687,9 +1025,11 @@ const app = {
                 </td>
                 <td>${a.email}</td>
                 <td>${a.phone_number || '—'}</td>
+                <td>${this.roleBadgeHtml(a.role)}</td>
                 <td style="font-size:0.85rem;color:var(--text-muted);">${new Date(a.created_at).toLocaleDateString()}</td>
-                <td><span class="badge badge-success">ACTIVE</span></td>
-            </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem;">No admin users found.</td></tr>';
+                <td><span class="badge ${active ? 'badge-success' : 'badge-danger'}">${active ? 'ACTIVE' : 'INACTIVE'}</span></td>
+            </tr>`;
+        }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem;">No admin users found.</td></tr>';
     },
 
     // ─── SETTINGS: PROFILE ─────────────────────────────────────
@@ -850,7 +1190,7 @@ const app = {
     },
 
     async tellerDeposit(user_id, amount) {
-        const res = await this.apiPost('/deposit', { user_id, amount });
+        const res = await this.apiPost('/admin/deposit', { user_id, amount });
         if (!res) return;
         const result = await res.json();
         if (res.ok) { toast.success(`Deposit of ${this.formatCurrency(amount)} recorded!`); this.closeModals(); this.fetchPageData(document.querySelector('.nav-link.active')?.getAttribute('data-page') || 'dashboard'); }
@@ -858,7 +1198,7 @@ const app = {
     },
 
     async tellerWithdraw(user_id, amount) {
-        const res = await this.apiPost('/withdraw', { user_id, amount });
+        const res = await this.apiPost('/admin/withdraw', { user_id, amount });
         if (!res) return;
         const result = await res.json();
         if (res.ok) { toast.success(`Withdrawal of ${this.formatCurrency(amount)} processed!`); this.closeModals(); this.fetchPageData(document.querySelector('.nav-link.active')?.getAttribute('data-page') || 'dashboard'); }

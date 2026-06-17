@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/api_service.dart';
+import '../widgets/shimmer_loading.dart';
+import '../utils/app_support.dart';
 
 class SavingsScreen extends StatefulWidget {
   const SavingsScreen({super.key});
@@ -17,6 +19,9 @@ class _SavingsScreenState extends State<SavingsScreen> {
   double _minBalance = 5000.0;
   double _sharePrice = 100.0;
   List<dynamic> _transactions = [];
+  List<dynamic> _allTransactions = [];
+  String? _filterType;
+  String? _filterLabel;
 
   @override
   void initState() {
@@ -31,6 +36,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
 
     final summaryResult = await ApiService.getUserSummary();
     final configResult = await ApiService.getSystemConfig();
+    final txResult = await ApiService.getTransactions();
 
     if (mounted) {
       setState(() {
@@ -41,6 +47,13 @@ class _SavingsScreenState extends State<SavingsScreen> {
           _savingsBalance = double.tryParse(userData['savings_balance']?.toString() ?? '0') ?? 0.0;
           _sharesBalance = double.tryParse(userData['shares_balance']?.toString() ?? '0') ?? 0.0;
           _transactions = data['recent_transactions'] ?? [];
+        }
+
+        if (txResult['success'] == true) {
+          _allTransactions = txResult['transactions'] ?? [];
+          if (_transactions.isEmpty) {
+            _transactions = _allTransactions.take(5).toList();
+          }
         }
 
         if (configResult['success'] == true) {
@@ -170,7 +183,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(res['message'] ?? 'Shares purchased successfully!'),
-                                  backgroundColor: const Color(0xFF0F5132),
+                                  backgroundColor: const Color(0xFF009639),
                                 ),
                               );
                               _loadSavingsData();
@@ -185,7 +198,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
                           }
                         },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0F5132),
+                    backgroundColor: const Color(0xFF009639),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                   ),
                   child: isBuying
@@ -198,6 +211,28 @@ class _SavingsScreenState extends State<SavingsScreen> {
         ),
       ),
     );
+  }
+
+  List<dynamic> get _displayTransactions {
+    var list = _allTransactions.isNotEmpty ? List<dynamic>.from(_allTransactions) : List<dynamic>.from(_transactions);
+    if (_filterType == 'DEPOSIT') {
+      list = list.where((t) => (t['transaction_type'] ?? '').toString() == 'DEPOSIT').toList();
+    } else if (_filterType == 'WITHDRAW') {
+      list = list.where((t) {
+        final type = (t['transaction_type'] ?? '').toString();
+        return type == 'WITHDRAW' || type == 'WITHDRAWAL';
+      }).toList();
+    } else if (_filterType == '30_DAYS') {
+      final cutoff = DateTime.now().subtract(const Duration(days: 30));
+      list = list.where((t) {
+        try {
+          return DateTime.parse(t['created_at'].toString()).isAfter(cutoff);
+        } catch (_) {
+          return true;
+        }
+      }).toList();
+    }
+    return list;
   }
 
   void _showFilterSheet(BuildContext context) {
@@ -219,16 +254,17 @@ class _SavingsScreenState extends State<SavingsScreen> {
           children: [
             const Text('Filter History', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 20),
-            _buildFilterOption('Date Range', Icons.date_range),
-            _buildFilterOption('Transaction Type', Icons.category),
-            _buildFilterOption('Amount Range', Icons.payments),
+            _buildFilterOption(context, 'All Transactions', Icons.list_alt, null, 'All'),
+            _buildFilterOption(context, 'Deposits Only', Icons.arrow_downward, 'DEPOSIT', 'Deposits'),
+            _buildFilterOption(context, 'Withdrawals Only', Icons.arrow_upward, 'WITHDRAW', 'Withdrawals'),
+            _buildFilterOption(context, 'Last 30 Days', Icons.date_range, '30_DAYS', 'Last 30 days'),
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F5132)),
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF009639)),
                 child: const Text('Apply Filters', style: TextStyle(color: Colors.white)),
               ),
             ),
@@ -238,12 +274,18 @@ class _SavingsScreenState extends State<SavingsScreen> {
     );
   }
 
-  Widget _buildFilterOption(String title, IconData icon) {
+  Widget _buildFilterOption(BuildContext context, String title, IconData icon, String? filterType, String label) {
     return ListTile(
-      leading: Icon(icon, color: const Color(0xFF0F5132)),
+      leading: Icon(icon, color: const Color(0xFF009639)),
       title: Text(title),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () {},
+      trailing: _filterType == filterType ? const Icon(Icons.check, color: Color(0xFF009639)) : const Icon(Icons.chevron_right),
+      onTap: () {
+        setState(() {
+          _filterType = filterType;
+          _filterLabel = filterType == null ? null : label;
+        });
+        Navigator.pop(context);
+      },
     );
   }
 
@@ -253,9 +295,9 @@ class _SavingsScreenState extends State<SavingsScreen> {
       backgroundColor: Colors.grey.shade50,
       body: RefreshIndicator(
         onRefresh: _loadSavingsData,
-        color: const Color(0xFF0F5132),
+        color: const Color(0xFF009639),
         child: _isLoading
-            ? const Center(child: CircularProgressIndicator(color: Color(0xFF0F5132)))
+            ? const PageShimmer()
             : SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
@@ -284,8 +326,8 @@ class _SavingsScreenState extends State<SavingsScreen> {
                               TextButton.icon(
                                 onPressed: () => _showFilterSheet(context),
                                 icon: const Icon(Icons.filter_list, size: 18),
-                                label: const Text('Filter'),
-                                style: TextButton.styleFrom(foregroundColor: const Color(0xFF0F5132)),
+                                label: Text(_filterLabel ?? 'Filter'),
+                                style: TextButton.styleFrom(foregroundColor: const Color(0xFF009639)),
                               ),
                             ],
                           ),
@@ -300,7 +342,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.pushNamed(context, '/contribution_form').then((_) => _loadSavingsData()),
-        backgroundColor: const Color(0xFF0F5132),
+        backgroundColor: const Color(0xFF009639),
         icon: const Icon(Icons.add_rounded, color: Colors.white),
         label: const Text('New Deposit', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
@@ -308,13 +350,14 @@ class _SavingsScreenState extends State<SavingsScreen> {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final topPadding = MediaQuery.of(context).padding.top;
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 60, 20, 30),
+      padding: EdgeInsets.fromLTRB(20, topPadding + 12, 20, 30),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF0F5132), Color(0xFF198754)],
+          colors: [Color(0xFF009639), Color(0xFF00B84A)],
         ),
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(35),
@@ -338,12 +381,9 @@ class _SavingsScreenState extends State<SavingsScreen> {
           ),
           const Spacer(),
           IconButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Preparing PDF statement for download...')),
-              );
-            },
+            onPressed: () => AppSupport.generateStatement(context, periodLabel: 'Savings Statement', days: 3650),
             icon: const Icon(Icons.file_download_outlined, color: Colors.white),
+            tooltip: 'Download Statement',
           ),
         ],
       ),
@@ -378,7 +418,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
             style: const TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0F5132),
+              color: Color(0xFF009639),
             ),
           ),
           const SizedBox(height: 25),
@@ -388,7 +428,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildStatItem('Min Balance', _formatCurrency(_minBalance), Icons.shield_outlined, const Color(0xFF0D6EFD)),
-              _buildStatItem('Cash Balance', _formatCurrency(_cashBalance), Icons.wallet, const Color(0xFF198754)),
+              _buildStatItem('Cash Balance', _formatCurrency(_cashBalance), Icons.wallet, const Color(0xFF00B84A)),
             ],
           ),
         ],
@@ -401,15 +441,15 @@ class _SavingsScreenState extends State<SavingsScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Colors.blue.shade900, Colors.blue.shade700],
+          colors: [Color(0xFF009639), Color(0xFF007A2E)],
         ),
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.2),
+            color: const Color(0xFF009639).withOpacity(0.25),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -418,27 +458,38 @@ class _SavingsScreenState extends State<SavingsScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'My Shares Capital',
-                style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                '${_formatCurrency(_sharesBalance)} (${(_sharesBalance / _sharePrice).toStringAsFixed(0)} Shares)',
-                style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-              ),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'My Shares Capital',
+                  style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '${_formatCurrency(_sharesBalance)}',
+                  style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  '${(_sharesBalance / _sharePrice).toStringAsFixed(0)} Shares @ UGX ${_sharePrice.toStringAsFixed(0)}/share',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: Colors.white60, fontSize: 12),
+                ),
+              ],
+            ),
           ),
+          const SizedBox(width: 10),
           ElevatedButton.icon(
             onPressed: () => _showBuySharesSheet(context),
             icon: const Icon(Icons.add_shopping_cart, size: 16),
-            label: const Text('Buy Shares', style: TextStyle(fontWeight: FontWeight.bold)),
+            label: const Text('Buy', style: TextStyle(fontWeight: FontWeight.bold)),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
-              foregroundColor: Colors.blue.shade900,
+              foregroundColor: const Color(0xFF009639),
               elevation: 0,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
@@ -449,18 +500,24 @@ class _SavingsScreenState extends State<SavingsScreen> {
   }
 
   Widget _buildStatItem(String label, String value, IconData icon, Color color) {
-    return Column(
-      children: [
-        Icon(icon, color: color, size: 22),
-        const SizedBox(height: 8),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-        Text(label, style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
-      ],
+    return Expanded(
+      child: Column(
+        children: [
+          Icon(icon, color: const Color(0xFF009639), size: 22),
+          const SizedBox(height: 8),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF009639))),
+          ),
+          Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+        ],
+      ),
     );
   }
 
   Widget _buildHistoryList() {
-    if (_transactions.isEmpty) {
+    final items = _displayTransactions;
+    if (items.isEmpty) {
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.all(30),
@@ -484,9 +541,9 @@ class _SavingsScreenState extends State<SavingsScreen> {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: _transactions.length,
+      itemCount: items.length,
       itemBuilder: (context, index) {
-        final tx = _transactions[index];
+        final tx = items[index];
         final String type = tx['transaction_type'] ?? 'DEPOSIT';
         final double amount = double.tryParse(tx['amount']?.toString() ?? '0') ?? 0.0;
         final String dateStr = tx['created_at'] ?? '';
@@ -498,7 +555,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
 
         if (type == 'DEPOSIT' || type == 'LOAN_DISBURSEMENT' || type == 'DIVIDEND_PAYOUT') {
           icon = Icons.arrow_downward_rounded;
-          color = Colors.green;
+          color = const Color(0xFF009639);
           sign = '+';
         } else {
           icon = Icons.arrow_upward_rounded;

@@ -38,9 +38,9 @@
                     <i class="fa-solid fa-lock"></i> Secure Login
                 </button>
             </form>
-            <p style="margin-top: 1.5rem; text-align: center; font-size: 0.875rem; color: #64748b;">
-                New administrator? <a href="#" id="show-register"
-                    style="color: var(--primary); font-weight: 700; text-decoration: none;">Request Account</a>
+            <p style="margin-top: 1.5rem; text-align: center; font-size: 0.875rem; color: #64748b;" id="bootstrap-register-link" class="hidden">
+                First-time setup? <a href="#" id="show-register"
+                    style="color: var(--primary); font-weight: 700; text-decoration: none;">Create Super Admin Account</a>
             </p>
             <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 1.5rem; color: var(--text-muted); font-size: 0.75rem; font-weight: 600; border-top: 1px solid var(--sidebar-border); padding-top: 1rem;">
                 <i class="fa-solid fa-shield-halved" style="color: var(--success); font-size: 0.85rem;"></i>
@@ -53,18 +53,19 @@
                 <i class="fa-solid fa-building-columns"></i>
                 <span style="color: #0f172a;">SACCO </span><span style="color: var(--primary);">ADMIN</span>
             </div>
-            <h2>Create Administrative Account</h2>
+            <h2>Create Super Admin Account</h2>
+            <p style="text-align:center;color:#64748b;font-size:0.85rem;margin-bottom:1rem;">One-time setup — only a single Super Admin is allowed.</p>
             <div id="register-error" class="badge badge-danger hidden"
                 style="width: 100%; margin-bottom: 1.5rem; text-align: center; border-radius: 8px;"></div>
             <form id="register-form">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
                         <label>Full Legal Name</label>
-                        <input type="text" id="reg-fullname" placeholder="John Doe" required>
+                        <input type="text" id="reg-fullname" placeholder="Full name" required>
                     </div>
                     <div class="form-group">
                         <label>Official Username</label>
-                        <input type="text" id="reg-username" placeholder="jdoe_admin" required>
+                        <input type="text" id="reg-username" placeholder="admin" required>
                     </div>
                 </div>
                 <div class="form-group">
@@ -92,7 +93,7 @@
                 </div>
                 <button type="submit" class="btn btn-primary"
                     style="width: 100%; justify-content: center; padding: 1rem; border-radius: 12px;">
-                    Register System Admin
+                    Register Super Admin
                 </button>
             </form>
             <p style="margin-top: 1.5rem; text-align: center; font-size: 0.875rem; color: #64748b;">
@@ -113,6 +114,11 @@
             <span>SACCO </span><span style="color: var(--primary);">ADMIN</span>
         </div>
         <ul class="nav-links">
+            <li class="nav-item super-admin-only hidden" id="nav-item-super-admin">
+                <a href="#" class="nav-link" data-page="super-admin">
+                    <i class="fa-solid fa-crown"></i> <span>Super Admin</span>
+                </a>
+            </li>
             <li class="nav-item">
                 <a href="#" class="nav-link active" data-page="dashboard">
                     <i class="fa-solid fa-house"></i> <span>Executive Overview</span>
@@ -123,19 +129,24 @@
                     <i class="fa-solid fa-users"></i> <span>Member Registry</span>
                 </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item admin-only-nav">
                 <a href="#" class="nav-link" data-page="loans">
                     <i class="fa-solid fa-hand-holding-dollar"></i> <span>Loan Portfolio</span>
                 </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item admin-only-nav">
                 <a href="#" class="nav-link" data-page="transactions">
                     <i class="fa-solid fa-receipt"></i> <span>Financial Audit</span>
                 </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item super-admin-only hidden" id="nav-item-settings">
                 <a href="#" class="nav-link" data-page="settings">
                     <i class="fa-solid fa-gears"></i> <span>System Settings</span>
+                </a>
+            </li>
+            <li class="nav-item non-super-admin-only hidden" id="nav-item-profile">
+                <a href="#" class="nav-link" data-page="settings">
+                    <i class="fa-solid fa-user-pen"></i> <span>My Profile</span>
                 </a>
             </li>
             <li class="nav-item"
@@ -190,12 +201,167 @@
                 <div class="user-profile">
                     <div class="user-info">
                         <div class="user-name" id="admin-name">Admin User</div>
-                        <div class="user-role">System Auditor</div>
+                        <div class="user-role" id="admin-role-label">Administrator</div>
                     </div>
                     <div class="avatar" id="admin-avatar">A</div>
                 </div>
             </div>
         </header>
+
+        <!-- Super Admin Control Center -->
+        <section id="page-super-admin" class="hidden">
+            <div class="welcome-banner super-admin-banner">
+                <div class="welcome-banner-left">
+                    <div class="welcome-avatar" id="sa-welcome-avatar">SA</div>
+                    <div class="welcome-message">
+                        <span class="welcome-greeting">SUPER ADMIN CONTROL CENTER</span>
+                        <h2><span id="sa-welcome-name">Super Admin</span></h2>
+                        <span class="welcome-role-badge role-badge-super"><i class="fa-solid fa-crown"></i> FULL SYSTEM ACCESS</span>
+                    </div>
+                </div>
+                <div class="welcome-banner-right">
+                    <div class="welcome-date-card">
+                        <span class="date-label">YOUR ROLE</span>
+                        <span class="date-value">System Owner — One Super Admin Only</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-grid" id="sa-stats-grid">
+                <div class="stat-card">
+                    <i class="fa-solid fa-user-shield stat-icon"></i>
+                    <span class="stat-label">Admin Accounts</span>
+                    <span class="stat-value" id="sa-stat-admins">...</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fa-solid fa-user-group stat-icon"></i>
+                    <span class="stat-label">Total Members</span>
+                    <span class="stat-value" id="sa-stat-users">...</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fa-solid fa-hourglass-half stat-icon"></i>
+                    <span class="stat-label">Pending Loans</span>
+                    <span class="stat-value" id="sa-stat-loans">...</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fa-solid fa-clipboard-list stat-icon"></i>
+                    <span class="stat-label">Audit Events</span>
+                    <span class="stat-value" id="sa-stat-audit">...</span>
+                </div>
+            </div>
+
+            <div class="super-admin-grid">
+                <div class="data-card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-user-plus" style="color: var(--primary);"></i> Create Admin Account</h3>
+                    </div>
+                    <div style="padding: 1.5rem;">
+                        <form id="sa-create-admin-form" onsubmit="app.createAdmin(event)">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div class="form-group">
+                                    <label>Full Name</label>
+                                    <input type="text" id="sa-admin-fullname" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Username</label>
+                                    <input type="text" id="sa-admin-username" required>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="email" id="sa-admin-email" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Phone (10 digits)</label>
+                                    <input type="text" id="sa-admin-phone" maxlength="10" pattern="[0-9]{10}" required>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div class="form-group">
+                                    <label>Password</label>
+                                    <input type="password" id="sa-admin-password" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Role</label>
+                                    <select id="sa-admin-role" class="form-select" required>
+                                        <option value="ADMIN">Admin — Full operations</option>
+                                        <option value="TELLER">Teller — Members &amp; cash only</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-user-shield"></i> Create Admin
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-users-gear" style="color: var(--warning);"></i> Administrator Accounts</h3>
+                        <button class="btn btn-primary btn-sm" onclick="app.loadSuperAdminAdmins()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="sa-admins-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-card" style="margin-top: 1.5rem;">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-users" style="color: var(--success);"></i> Member Management</h3>
+                    <button class="btn btn-primary btn-sm" onclick="app.loadSuperAdminMembers()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+                </div>
+                <div class="table-responsive">
+                    <table id="sa-members-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Member</th>
+                                <th>Email</th>
+                                <th>Balance</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="data-card" style="margin-top: 1.5rem;">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-clipboard-list" style="color: var(--info);"></i> Admin Audit Log</h3>
+                    <button class="btn btn-primary btn-sm" onclick="app.loadAuditLog()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+                </div>
+                <div class="table-responsive">
+                    <table id="sa-audit-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Admin</th>
+                                <th>Action</th>
+                                <th>Target</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
 
         <!-- Dashboard Page -->
         <section id="page-dashboard">
@@ -206,7 +372,7 @@
                     <div class="welcome-message">
                         <span class="welcome-greeting" id="welcome-greeting-text">GOOD AFTERNOON,</span>
                         <h2><span id="welcome-admin-name">Super Admin</span></h2>
-                        <span class="welcome-role-badge"><i class="fa-solid fa-shield-halved"></i> SUPER ADMIN</span>
+                        <span class="welcome-role-badge" id="welcome-role-badge"><i class="fa-solid fa-shield-halved"></i> ADMINISTRATOR</span>
                     </div>
                 </div>
                 <div class="welcome-banner-right">
@@ -477,19 +643,19 @@
         <section id="page-settings" class="hidden">
             <!-- Settings Tabs Navigation -->
             <div class="settings-tabs-nav">
-                <button class="settings-tab-btn active" data-tab="financial">
+                <button class="settings-tab-btn super-admin-tab" data-tab="financial">
                     <i class="fa-solid fa-coins"></i> Financial Config
                 </button>
-                <button class="settings-tab-btn" data-tab="security">
+                <button class="settings-tab-btn super-admin-tab" data-tab="security">
                     <i class="fa-solid fa-shield-halved"></i> Security
                 </button>
-                <button class="settings-tab-btn" data-tab="admins">
+                <button class="settings-tab-btn super-admin-tab" data-tab="admins">
                     <i class="fa-solid fa-user-shield"></i> Admin Users
                 </button>
                 <button class="settings-tab-btn" data-tab="profile">
                     <i class="fa-solid fa-user-pen"></i> My Profile
                 </button>
-                <button class="settings-tab-btn" data-tab="system">
+                <button class="settings-tab-btn super-admin-tab" data-tab="system">
                     <i class="fa-solid fa-circle-info"></i> System Info
                 </button>
             </div>
@@ -646,6 +812,7 @@
                                     <th>Full Name</th>
                                     <th>Email</th>
                                     <th>Phone</th>
+                                    <th>Role</th>
                                     <th>Joined</th>
                                     <th>Status</th>
                                 </tr>

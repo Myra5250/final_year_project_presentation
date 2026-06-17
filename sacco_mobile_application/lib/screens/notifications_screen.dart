@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/api_service.dart';
+import '../widgets/shimmer_loading.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -47,7 +48,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('All notifications marked as read'),
-            backgroundColor: Colors.green,
+            backgroundColor: const Color(0xFF009639),
           ),
         );
         _loadNotifications();
@@ -90,21 +91,21 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Map<String, dynamic> _getStyleForNotification(String title) {
     final lowerTitle = title.toLowerCase();
     if (lowerTitle.contains('approved') || lowerTitle.contains('🎉')) {
-      return {'icon': Icons.check_circle, 'color': Colors.green};
+      return {'icon': Icons.check_circle, 'color': const Color(0xFF00B84A)};
     } else if (lowerTitle.contains('rejected') || lowerTitle.contains('failed') || lowerTitle.contains('alert')) {
-      return {'icon': Icons.cancel, 'color': Colors.red};
+      return {'icon': Icons.cancel, 'color': Colors.red.shade400};
     } else if (lowerTitle.contains('consideration') || lowerTitle.contains('pending')) {
-      return {'icon': Icons.hourglass_top, 'color': Colors.orange};
+      return {'icon': Icons.hourglass_top, 'color': const Color(0xFF009639)};
     } else if (lowerTitle.contains('deposit')) {
-      return {'icon': Icons.account_balance_wallet, 'color': Colors.blue};
+      return {'icon': Icons.account_balance_wallet, 'color': const Color(0xFF00B84A)};
     } else if (lowerTitle.contains('withdraw')) {
-      return {'icon': Icons.money_off, 'color': Colors.deepOrange};
+      return {'icon': Icons.money_off, 'color': const Color(0xFF007A2E)};
     } else if (lowerTitle.contains('transfer')) {
-      return {'icon': Icons.swap_horiz, 'color': Colors.teal};
+      return {'icon': Icons.swap_horiz, 'color': const Color(0xFF009639)};
     } else if (lowerTitle.contains('received') || lowerTitle.contains('funds')) {
-      return {'icon': Icons.arrow_downward, 'color': Colors.green};
+      return {'icon': Icons.arrow_downward, 'color': const Color(0xFF00B84A)};
     } else if (lowerTitle.contains('shares')) {
-      return {'icon': Icons.pie_chart, 'color': Colors.purple};
+      return {'icon': Icons.pie_chart, 'color': const Color(0xFF009639)};
     }
     return {'icon': Icons.notifications, 'color': Colors.grey};
   }
@@ -119,7 +120,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           Expanded(
             child: RefreshIndicator(
               onRefresh: _loadNotifications,
-              color: Colors.green.shade800,
+              color: const Color(0xFF007A2E),
               child: _buildContent(),
             ),
           ),
@@ -130,9 +131,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   Widget _buildContent() {
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: Color(0xFF0F5132)),
-      );
+      return const PageShimmer();
     }
 
     if (_errorMessage != null) {
@@ -152,7 +151,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _loadNotifications,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.green.shade800),
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF007A2E)),
                 child: const Text('Retry', style: TextStyle(color: Colors.white)),
               ),
             ],
@@ -212,16 +211,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   Widget _buildHeader(BuildContext context) {
     final bool hasUnread = _notifications.any((n) => n['is_unread'] == true || n['is_unread'] == 1);
-    
+    final topPadding = MediaQuery.of(context).padding.top;
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 60, 20, 30),
-      decoration: BoxDecoration(
+      padding: EdgeInsets.fromLTRB(20, topPadding + 12, 20, 30),
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Colors.green.shade900, Colors.green.shade700],
+          colors: [Color(0xFF009639), Color(0xFF00B84A)],
         ),
-        borderRadius: const BorderRadius.only(
+        borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(35),
           bottomRight: Radius.circular(35),
         ),
@@ -233,15 +232,18 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
           ),
           const SizedBox(width: 5),
-          const Text(
-            'Notifications',
-            style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+          const Expanded(
+            child: Text(
+              'Notifications',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+            ),
           ),
-          const Spacer(),
           if (hasUnread && !_isLoading && _errorMessage == null)
             TextButton(
               onPressed: _markAllAsRead,
-              child: const Text('Mark all read', style: TextStyle(color: Colors.white70)),
+              child: const Text('Mark all read', style: TextStyle(color: Colors.white70, fontSize: 12)),
             ),
         ],
       ),
@@ -316,6 +318,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   const SizedBox(height: 5),
                   Text(
                     message,
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: isUnread ? Colors.grey.shade800 : Colors.grey.shade600, 
                       fontSize: 13, 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_images.dart';
 import '../services/api_service.dart';
+import '../theme/app_colors.dart';
 
 class Splash1 extends StatefulWidget {
   const Splash1({super.key});
@@ -13,6 +14,7 @@ class _Splash1State extends State<Splash1> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
+  bool _showContinue = false;
 
   @override
   void initState() {
@@ -32,29 +34,31 @@ class _Splash1State extends State<Splash1> with SingleTickerProviderStateMixin {
     );
 
     _controller.forward();
-
-    // Auto-login: check for an existing session after the brand animation
-    _checkSession();
+    _resolveInitialRoute();
   }
 
-  Future<void> _checkSession() async {
-    // Allow the 1.5-second brand splash to show before we redirect
+  Future<void> _resolveInitialRoute() async {
     await Future.delayed(const Duration(milliseconds: 1500));
-
     if (!mounted) return;
 
-    final token = await ApiService.getToken();
-    final rememberMe = await ApiService.getRememberMe();
-    if (token != null && rememberMe) {
-      // Valid session and user chose "Remember Me" → skip to dashboard
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/dashboard');
-      }
-    } else if (token != null && !rememberMe) {
-      // Token exists but remember me not set – clear session to force re-login
-      await ApiService.clearSession();
+    if (await ApiService.isLoggedIn()) {
+      Navigator.pushReplacementNamed(context, '/dashboard');
+      return;
     }
-    // If no session, the user presses "Continue" manually (normal flow)
+
+    final onboardingDone = await ApiService.hasCompletedOnboarding();
+    if (!mounted) return;
+
+    if (onboardingDone) {
+      Navigator.pushReplacementNamed(context, '/login');
+      return;
+    }
+
+    setState(() => _showContinue = true);
+  }
+
+  void _continueOnboarding() {
+    Navigator.pushReplacementNamed(context, '/splash2');
   }
 
   @override
@@ -67,12 +71,8 @@ class _Splash1State extends State<Splash1> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Colors.green.shade900, Colors.green.shade600],
-          ),
+        decoration: const BoxDecoration(
+          gradient: AppColors.headerGradient,
         ),
         child: SafeArea(
           child: Center(
@@ -119,13 +119,6 @@ class _Splash1State extends State<Splash1> with SingleTickerProviderStateMixin {
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                             letterSpacing: 1.5,
-                            shadows: [
-                              Shadow(
-                                blurRadius: 10,
-                                color: Colors.black45,
-                                offset: Offset(2, 2),
-                              ),
-                            ],
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -149,41 +142,38 @@ class _Splash1State extends State<Splash1> with SingleTickerProviderStateMixin {
                     ),
                   ),
                   const Spacer(),
-                  FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 55,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushReplacementNamed(context, '/splash2');
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.green.shade800,
-                          elevation: 5,
-                          shadowColor: Colors.black.withOpacity(0.3),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
+                  if (_showContinue)
+                    FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 55,
+                        child: ElevatedButton(
+                          onPressed: _continueOnboarding,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: AppColors.primary,
+                            elevation: 5,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text('Continue', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                              SizedBox(width: 10),
+                              Icon(Icons.arrow_forward_rounded),
+                            ],
                           ),
                         ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Continue',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(width: 10),
-                            Icon(Icons.arrow_forward_rounded)
-                          ],
-                        ),
                       ),
+                    )
+                  else
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 20),
+                      child: CircularProgressIndicator(color: Colors.white),
                     ),
-                  ),
                   const SizedBox(height: 30),
                 ],
               ),

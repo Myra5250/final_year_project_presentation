@@ -51,7 +51,7 @@ class _Splash2State extends State<Splash2> with SingleTickerProviderStateMixin {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.green.shade50, Colors.white],
+            colors: [const Color(0xFFE8F8EE), Colors.white],
             stops: const [0.0, 0.6],
           ),
         ),
@@ -75,7 +75,7 @@ class _Splash2State extends State<Splash2> with SingleTickerProviderStateMixin {
                             color: Colors.white,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.green.withOpacity(0.1),
+                                color: const Color(0xFF009639).withOpacity(0.1),
                                 blurRadius: 30,
                                 spreadRadius: 10,
                                 offset: const Offset(0, 10),
@@ -105,7 +105,7 @@ class _Splash2State extends State<Splash2> with SingleTickerProviderStateMixin {
                           style: TextStyle(
                             fontSize: 32, 
                             fontWeight: FontWeight.w800,
-                            color: Colors.green.shade800,
+                            color: const Color(0xFF007A2E),
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -115,7 +115,7 @@ class _Splash2State extends State<Splash2> with SingleTickerProviderStateMixin {
                           style: TextStyle(
                             fontSize: 32, 
                             fontWeight: FontWeight.w800,
-                            color: Colors.green.shade600,
+                            color: const Color(0xFF009639),
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -169,7 +169,7 @@ class _Splash2State extends State<Splash2> with SingleTickerProviderStateMixin {
                                   Navigator.pushReplacementNamed(context, '/splash3');
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green.shade700,
+                                  backgroundColor: const Color(0xFF009639),
                                   foregroundColor: Colors.white,
                                   elevation: 5,
                                   shape: RoundedRectangleBorder(
@@ -208,7 +208,7 @@ class _Splash2State extends State<Splash2> with SingleTickerProviderStateMixin {
       height: 8,
       width: isActive ? 24 : 8,
       decoration: BoxDecoration(
-        color: isActive ? Colors.green.shade600 : Colors.green.shade200,
+        color: isActive ? const Color(0xFF009639) : const Color(0xFFB8E6C8),
         borderRadius: BorderRadius.circular(4),
       ),
     );

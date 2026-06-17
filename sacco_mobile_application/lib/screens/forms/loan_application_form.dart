@@ -201,12 +201,12 @@ class _LoanApplicationFormState extends State<LoanApplicationForm> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
+                  color: const Color(0xFF009639).withOpacity(0.08),
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.info_outline, color: Colors.blue.shade700),
+                    const Icon(Icons.info_outline, color: Color(0xFF009639)),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -224,7 +224,7 @@ class _LoanApplicationFormState extends State<LoanApplicationForm> {
                 child: ElevatedButton(
                   onPressed: _isLoading || !_allowLoans ? null : _handleLoanApplication,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue.shade800,
+                    backgroundColor: const Color(0xFF009639),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                   ),
                   child: _isLoading
@@ -277,7 +277,7 @@ class _LoanApplicationFormState extends State<LoanApplicationForm> {
                 onChanged: _allowLoans
                     ? (val) => setState(() => _loanType = val!)
                     : null,
-                activeColor: Colors.blue.shade800,
+                activeColor: const Color(0xFF009639),
                 contentPadding: EdgeInsets.zero,
               ))
           .toList(),
@@ -293,7 +293,7 @@ class _LoanApplicationFormState extends State<LoanApplicationForm> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.description, color: Colors.blue, size: 60),
+            const Icon(Icons.description, color: Color(0xFF009639), size: 60),
             const SizedBox(height: 16),
             const Text(
               'Application Received',
@@ -313,7 +313,7 @@ class _LoanApplicationFormState extends State<LoanApplicationForm> {
                   Navigator.pop(context); // Close dialog
                   Navigator.pop(context); // Go back to loans
                 },
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade800),
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF009639)),
                 child: const Text('Great, thanks!', style: TextStyle(color: Colors.white)),
               ),
             ),

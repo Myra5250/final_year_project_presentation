@@ -53,7 +53,7 @@ class _MfaVerificationScreenState extends State<MfaVerificationScreen> {
 
       if (result['success'] == true) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login successful!'), backgroundColor: Color(0xFF0F5132)),
+          const SnackBar(content: Text('Login successful!'), backgroundColor: Color(0xFF009639)),
         );
         Navigator.pushNamedAndRemoveUntil(context, '/dashboard', (route) => false);
       } else {
@@ -109,13 +109,13 @@ class _MfaVerificationScreenState extends State<MfaVerificationScreen> {
                 height: 90,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF0F5132), Color(0xFF198754)],
+                    colors: [Color(0xFF009639), Color(0xFF00B84A)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(28),
                   boxShadow: [
-                    BoxShadow(color: const Color(0xFF0F5132).withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 8)),
+                    BoxShadow(color: const Color(0xFF009639).withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 8)),
                   ],
                 ),
                 child: const Icon(Icons.shield_rounded, color: Colors.white, size: 44),
@@ -124,7 +124,7 @@ class _MfaVerificationScreenState extends State<MfaVerificationScreen> {
 
               const Text(
                 'Two-Factor Authentication',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF0F5132)),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF009639)),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
@@ -137,42 +137,45 @@ class _MfaVerificationScreenState extends State<MfaVerificationScreen> {
 
               // OTP boxes
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(6, (i) {
-                  return SizedBox(
-                    width: 48,
-                    height: 58,
-                    child: TextField(
-                      controller: _controllers[i],
-                      focusNode: _focusNodes[i],
-                      textAlign: TextAlign.center,
-                      keyboardType: TextInputType.number,
-                      maxLength: 1,
-                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                      decoration: InputDecoration(
-                        counterText: '',
-                        contentPadding: EdgeInsets.zero,
-                        filled: true,
-                        fillColor: const Color(0xFFF0F7F4),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide.none,
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: const BorderSide(color: Color(0xFF0F5132), width: 2),
+                  return Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(left: i == 0 ? 0 : 4, right: i == 5 ? 0 : 4),
+                      child: SizedBox(
+                        height: 58,
+                        child: TextField(
+                          controller: _controllers[i],
+                          focusNode: _focusNodes[i],
+                          textAlign: TextAlign.center,
+                          keyboardType: TextInputType.number,
+                          maxLength: 1,
+                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                          decoration: InputDecoration(
+                            counterText: '',
+                            contentPadding: EdgeInsets.zero,
+                            filled: true,
+                            fillColor: const Color(0xFFF0F7F4),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(color: Color(0xFF009639), width: 2),
+                            ),
+                          ),
+                          onChanged: (val) {
+                            if (val.isNotEmpty && i < 5) {
+                              _focusNodes[i + 1].requestFocus();
+                            } else if (val.isEmpty && i > 0) {
+                              _focusNodes[i - 1].requestFocus();
+                            }
+                            if (i == 5 && val.isNotEmpty) {
+                              _verifyCode();
+                            }
+                          },
                         ),
                       ),
-                      onChanged: (val) {
-                        if (val.isNotEmpty && i < 5) {
-                          _focusNodes[i + 1].requestFocus();
-                        } else if (val.isEmpty && i > 0) {
-                          _focusNodes[i - 1].requestFocus();
-                        }
-                        if (i == 5 && val.isNotEmpty) {
-                          _verifyCode();
-                        }
-                      },
                     ),
                   );
                 }),
@@ -186,10 +189,10 @@ class _MfaVerificationScreenState extends State<MfaVerificationScreen> {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _verifyCode,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0F5132),
+                    backgroundColor: const Color(0xFF009639),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     elevation: 4,
-                    shadowColor: const Color(0xFF0F5132).withOpacity(0.3),
+                    shadowColor: const Color(0xFF009639).withOpacity(0.3),
                   ),
                   child: _isLoading
                       ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
@@ -207,7 +210,7 @@ class _MfaVerificationScreenState extends State<MfaVerificationScreen> {
                     onPressed: _isResending ? null : _resendCode,
                     child: Text(
                       _isResending ? 'Sending…' : 'Resend',
-                      style: const TextStyle(color: Color(0xFF0F5132), fontWeight: FontWeight.bold),
+                      style: const TextStyle(color: Color(0xFF009639), fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
