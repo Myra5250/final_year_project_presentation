@@ -11,7 +11,7 @@ class ApiService {
 
   /// 🚀 PRODUCTION: Paste your Railway URL here once deployed.
   /// Format: https://your-app-name.up.railway.app/api
-  static const String _productionUrl = 'https://YOUR-APP.up.railway.app/api';
+  static const String _productionUrl = 'http://192.168.100.97:8000/api';
 
   /// 🛠  DEVELOPMENT: Local server address.
   static const String _devDefault = 'http://127.0.0.1:8000/api';
@@ -63,7 +63,7 @@ class ApiService {
       // Normalise: strip trailing slash then append /health
       final base = url.endsWith('/') ? url.substring(0, url.length - 1) : url;
       // Try /health relative to the api root
-      final healthUrl = base.replaceAll('/api', '') + '/health';
+      final healthUrl = '${base.replaceAll('/api', '')}/health';
       final response = await http
           .get(Uri.parse(healthUrl))
           .timeout(const Duration(seconds: 5));
@@ -142,6 +142,7 @@ class ApiService {
     final token = await getToken();
     return {
       'Content-Type': 'application/json',
+      'Bypass-Tunnel-Reminder': 'true',
       if (token != null) 'Authorization': 'Bearer $token',
     };
   }
@@ -151,7 +152,7 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/login'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true'},
         body: json.encode({'email': email, 'password': password}),
       ).timeout(const Duration(seconds: 8));
 
@@ -182,7 +183,7 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/login/verify'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true'},
         body: json.encode({'email': email, 'code': code}),
       ).timeout(const Duration(seconds: 8));
 
@@ -204,7 +205,7 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/forgot-password'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true'},
         body: json.encode({'email': email}),
       ).timeout(const Duration(seconds: 8));
 
@@ -219,7 +220,7 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/reset-password'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true'},
         body: json.encode({'email': email, 'code': code, 'new_password': newPassword}),
       ).timeout(const Duration(seconds: 8));
 
@@ -238,7 +239,7 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/register'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true'},
         body: json.encode({
           'username': username,
           'email': email,
