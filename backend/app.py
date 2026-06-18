@@ -403,7 +403,7 @@ def health():
         'status': 'ok' if ok else 'degraded',
         'db': db_status,
         'service': 'Youth SACCO API'
-    }), 200 if ok else 503
+    }), 200
 
 @app.route('/api/health', methods=['GET'])
 def api_health():
