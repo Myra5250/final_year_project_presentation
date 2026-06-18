@@ -81,7 +81,7 @@ class SaccoApp extends StatelessWidget {
             backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             elevation: 2,
-            shadowColor: AppColors.primary.withOpacity(0.2),
+            shadowColor: AppColors.primary.withValues(alpha: 0.2),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
