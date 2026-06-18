@@ -9,8 +9,9 @@ class ApiService {
   // In DEBUG builds   → uses localhost (change _devDefault for your local IP).
   // A custom URL saved by the user in Settings always takes priority.
 
-  /// 🚀 PRODUCTION: Update this to your Render URL after deploying.
-  static const String _productionUrl = 'https://youth-sacco-backend.onrender.com/api';
+  /// 🚀 PRODUCTION: Paste your Railway URL here once deployed.
+  /// Format: https://your-app-name.up.railway.app/api
+  static const String _productionUrl = 'https://YOUR-APP.up.railway.app/api';
 
   /// 🛠  DEVELOPMENT: Local server address.
   static const String _devDefault = 'http://127.0.0.1:8000/api';
