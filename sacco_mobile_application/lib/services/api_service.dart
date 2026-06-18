@@ -11,7 +11,7 @@ class ApiService {
 
   /// 🚀 PRODUCTION: Paste your Railway URL here once deployed.
   /// Format: https://your-app-name.up.railway.app/api
-  static const String _productionUrl = 'http://192.168.100.97:8000/api';
+  static const String _productionUrl = 'https://subwoofer-science-outward.ngrok-free.dev/api';
 
   /// 🛠  DEVELOPMENT: Local server address.
   static const String _devDefault = 'http://127.0.0.1:8000/api';
@@ -142,7 +142,7 @@ class ApiService {
     final token = await getToken();
     return {
       'Content-Type': 'application/json',
-      'Bypass-Tunnel-Reminder': 'true',
+      'ngrok-skip-browser-warning': 'true',
       if (token != null) 'Authorization': 'Bearer $token',
     };
   }
@@ -152,7 +152,7 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/login'),
-        headers: {'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true'},
+        headers: {'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true'},
         body: json.encode({'email': email, 'password': password}),
       ).timeout(const Duration(seconds: 8));
 
@@ -183,7 +183,7 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/login/verify'),
-        headers: {'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true'},
+        headers: {'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true'},
         body: json.encode({'email': email, 'code': code}),
       ).timeout(const Duration(seconds: 8));
 
@@ -205,7 +205,7 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/forgot-password'),
-        headers: {'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true'},
+        headers: {'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true'},
         body: json.encode({'email': email}),
       ).timeout(const Duration(seconds: 8));
 
@@ -220,7 +220,7 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/reset-password'),
-        headers: {'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true'},
+        headers: {'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true'},
         body: json.encode({'email': email, 'code': code, 'new_password': newPassword}),
       ).timeout(const Duration(seconds: 8));
 
@@ -239,7 +239,7 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/register'),
-        headers: {'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true'},
+        headers: {'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true'},
         body: json.encode({
           'username': username,
           'email': email,
